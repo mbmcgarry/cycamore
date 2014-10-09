@@ -69,7 +69,7 @@ Sink::GetMatlRequests() {
   double amt = RequestAmt();
   Material::Ptr mat;
 
-  if (composition == "") {
+  if (composition.empty()) {
     mat = cyclus::NewBlankMaterial(amt);
   } else {
     Composition::Ptr c = this->context()->GetRecipe(composition);
