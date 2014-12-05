@@ -118,7 +118,7 @@ EnrichmentFacility::GetMatlBids(
   
   BidPortfolio<Material>::Ptr port(new BidPortfolio<Material>());
   
-  for (vector<string>::iterator commod = out_commods.begin();
+  for (std::vector<std::string>::iterator commod = out_commods.begin();
        commod != out_commods.end();
        commod++) {
     if (commod_requests.count(commod) == 0) {
@@ -179,9 +179,11 @@ void EnrichmentFacility::GetMatlTrades(
     Material::Ptr response = Enrich_(mat, qty);
     responses.push_back(std::make_pair(*it, response));
     LOG(cyclus::LEV_INFO5, "EnrFac") << prototype()
-                                  << " just received an order"
-                                  << " for " << it->amt
-				     << " of " << out_commod;  //***What does this refer to?
+				     << " just received an order"
+				     << " for " << it->amt
+      //				     << " of " <<  out_commods.front()
+				     << " of " << it->bid->request->commodity() ;
+    //				     << " of " <<  cyclus::Request<*it>::commodity() ;
   }
 
   if (cyclus::IsNegative(current_swu_capacity)) {

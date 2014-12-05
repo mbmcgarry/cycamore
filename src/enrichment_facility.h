@@ -197,11 +197,12 @@ class EnrichmentFacility : public cyclus::Facility {
 
   inline std::string in_commodity() const { return in_commod; }
 
-  inline void out_commods(std::vector<std::string> out_com) {
+  inline void out_commodities(std::vector<std::string> out_com) {
     out_commods = out_com;
-    )} //***  Add commod? (from sink.h line134
+    )} 
 
-  inline std::vector<std::string> out_commodities() const { return out_commods; } //*
+  inline const std::vector<std::string>&
+    out_commodities() const { return out_commods; } 
 
   inline void InRecipe(std::string in_rec) { in_recipe = in_rec; }
 
@@ -267,8 +268,8 @@ class EnrichmentFacility : public cyclus::Facility {
   std::string in_commod;
 
   #pragma cyclus var {"tooltip": "output commodities", \
-                      "doc": "commodities that the enrichment facility supplies", \
-                      "uitype": ["oneormore", "outcommodity"]}
+    "doc": "commodities that the enrichment facility supplies"} //,	\
+    //                      "uitype": ["oneormore", "outcommodity"]}
   std::vector<std::string> out_commods;
 
   #pragma cyclus var {"tooltip": "input commodity recipe", \
