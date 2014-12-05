@@ -19,7 +19,7 @@ EnrichmentFacility::EnrichmentFacility(cyclus::Context* ctx)
       initial_reserves(0),
       in_commod(""),
       in_recipe(""),
-      out_commod("") {}
+      out_commods("") {}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 EnrichmentFacility::~EnrichmentFacility() {}
@@ -33,7 +33,7 @@ std::string EnrichmentFacility::str() {
      << " * Tails assay: " << TailsAssay()
      << " * Feed assay: " << FeedAssay()
      << " * Input cyclus::Commodity: " << in_commodity()
-     << " * Output cyclus::Commodity: " << out_commodity();
+     << " * Output cyclus::Commodity: " << out_commodities();
   return ss.str();
 }
 
@@ -110,39 +110,49 @@ EnrichmentFacility::GetMatlBids(
   using cyclus::Material;
   using cyclus::Request;
 
+
   std::set<BidPortfolio<Material>::Ptr> ports;
-
-  if (commod_requests.count(out_commod) > 0 && inventory.quantity() > 0) {
-    BidPortfolio<Material>::Ptr port(new BidPortfolio<Material>());
-
+  if (inventory.quantity() <= 0) {
+    return ports;
+  }
+  
+  BidPortfolio<Material>::Ptr port(new BidPortfolio<Material>());
+  
+  for (vector<string>::iterator commod = out_commods.begin();
+       commod != out_commods.end();
+       commod++) {
+    if (commod_requests.count(commod) == 0) {
+      continue;
+    }
+  
     std::vector<Request<Material>*>& requests =
-        commod_requests[out_commod];
-
+      commod_requests[commod];
+    
     std::vector<Request<Material>*>::iterator it;
     for (it = requests.begin(); it != requests.end(); ++it) {
       Request<Material>* req = *it;
       if (ValidReq(req->target())) {
-        Material::Ptr offer = Offer_(req->target());
-        port->AddBid(req, offer, this);
+	Material::Ptr offer = Offer_(req->target());
+	port->AddBid(req, offer, this);
       }
     }
-
-    Converter<Material>::Ptr sc(new SWUConverter(feed_assay, tails_assay));
-    Converter<Material>::Ptr nc(new NatUConverter(feed_assay, tails_assay));
-    CapacityConstraint<Material> swu(swu_capacity, sc);
-    CapacityConstraint<Material> natu(inventory.quantity(), nc);
-    port->AddConstraint(swu);
-    port->AddConstraint(natu);
-
-    LOG(cyclus::LEV_INFO5, "EnrFac") << prototype()
-                                  << " adding a swu constraint of "
-                                  << swu.capacity();
-    LOG(cyclus::LEV_INFO5, "EnrFac") << prototype()
-                                  << " adding a natu constraint of "
-                                  << natu.capacity();
-
-    ports.insert(port);
   }
+  
+  Converter<Material>::Ptr sc(new SWUConverter(feed_assay, tails_assay));
+  Converter<Material>::Ptr nc(new NatUConverter(feed_assay, tails_assay));
+  CapacityConstraint<Material> swu(swu_capacity, sc);
+  CapacityConstraint<Material> natu(inventory.quantity(), nc);
+  port->AddConstraint(swu);
+  port->AddConstraint(natu);
+  
+  LOG(cyclus::LEV_INFO5, "EnrFac") << prototype()
+				   << " adding a swu constraint of "
+				   << swu.capacity();
+  LOG(cyclus::LEV_INFO5, "EnrFac") << prototype()
+				   << " adding a natu constraint of "
+				   << natu.capacity(); 
+  ports.insert(port);
+  
   return ports;
 }
 
@@ -171,7 +181,7 @@ void EnrichmentFacility::GetMatlTrades(
     LOG(cyclus::LEV_INFO5, "EnrFac") << prototype()
                                   << " just received an order"
                                   << " for " << it->amt
-                                  << " of " << out_commod;
+				     << " of " << out_commod;  //***What does this refer to?
   }
 
   if (cyclus::IsNegative(current_swu_capacity)) {

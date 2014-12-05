@@ -183,6 +183,39 @@ TEST_F(SinkTest, Print) {
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+TEST(SinkTest, InRecipe){
+  // Create a context
+  cyclus::Recorder rec;
+  cyclus::Timer ti;
+  cyclus::Context ctx(&ti, &rec);
+
+  // define some test material in the context
+  cyclus::CompMap m;
+  m[922350000] = 1;
+  m[922580000] = 2;
+  cyclus::Composition::Ptr c = cyclus::Composition::CreateFromMass(m);
+  ctx.AddRecipe("some_u",c) ;
+
+  // create a sink facility to interact with the DRE
+  //  cyclus::Agent* snk = new SinkFacility(&ctx);
+  cyclus::Agent* snk = new cycamore::Sink::Sink(&ctx);
+  snk->recipe("some_u");
+  snk->AddCommodity("u_commod");
+ 
+  std::set<RequestPortfolio<Material>::Ptr> ports = 
+    snk->GetMatlRequests();
+  
+  std::vector<Request<Material>*>&::iterator it =
+    ports.begin()->get()->requests();
+  std::vector<cyclus::Request<cyclus::Material>*> reqs = *it;
+  
+  cyclus::Material::Ptr mat = reqs[0]->target();
+  EXPECT_EQ(mat->comp(), c); 
+
+}
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 cyclus::Agent* SinkConstructor(cyclus::Context* ctx) {
   return new cycamore::Sink(ctx);
 }

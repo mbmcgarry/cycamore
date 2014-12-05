@@ -89,12 +89,12 @@ class NatUConverter : public cyclus::Converter<cyclus::Material> {
 ///  The EnrichmentFacility adds any accepted trades to its inventory.
 ///
 ///  @section bids Bids
-///  The EnrichmentFacility will bid on any request for its output commodity. It
+///  The EnrichmentFacility will bid on any request for its output commodities. It
 ///  will bid either the request quantity, or the quanity associated with either
 ///  its SWU constraint or natural uranium constraint, whichever is lower.
 ///
 ///  @section extrades Executing Trades
-///  The EnrichmentFacility will execute trades for its output commodity in the
+///  The EnrichmentFacility will execute trades for its output commodities in the
 ///  following manner:
 ///    #. Determine the trade's quantity and product assay
 ///    #. Determine the natural Uranium and SWU requires to create that product
@@ -197,11 +197,11 @@ class EnrichmentFacility : public cyclus::Facility {
 
   inline std::string in_commodity() const { return in_commod; }
 
-  inline void out_commodity(std::string out_com) {
-    out_commod = out_com;
-  }
+  inline void out_commods(std::vector<std::string> out_com) {
+    out_commods = out_com;
+    )} //***  Add commod? (from sink.h line134
 
-  inline std::string out_commodity() const { return out_commod; }
+  inline std::vector<std::string> out_commodities() const { return out_commods; } //*
 
   inline void InRecipe(std::string in_rec) { in_recipe = in_rec; }
 
@@ -265,10 +265,12 @@ class EnrichmentFacility : public cyclus::Facility {
                       "doc": "commodity that the enrichment facility accepts", \
                       "uitype": "incommodity"}
   std::string in_commod;
-  #pragma cyclus var {"tooltip": "output commodity", \
-                      "doc": "commodity that the enrichment facility supplies", \
-                      "uitype": "outcommodity"}
-  std::string out_commod;
+
+  #pragma cyclus var {"tooltip": "output commodities", \
+                      "doc": "commodities that the enrichment facility supplies", \
+                      "uitype": ["oneormore", "outcommodity"]}
+  std::vector<std::string> out_commods;
+
   #pragma cyclus var {"tooltip": "input commodity recipe", \
                       "doc": "recipe for enrichment facility's input commodity", \
                       "uitype": "recipe"}
