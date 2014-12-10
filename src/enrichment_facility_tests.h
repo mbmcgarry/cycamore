@@ -19,7 +19,8 @@ class EnrichmentFacilityTest : public ::testing::Test {
  protected:
   cyclus::TestContext tc_;
   EnrichmentFacility* src_facility;
-  std::string in_commod, out_commod, in_recipe;
+  std::string in_commod, in_recipe;
+  std::vector<std::string> out_commods ;
   cyclus::Composition::Ptr recipe;
   TestFacility* trader;
 

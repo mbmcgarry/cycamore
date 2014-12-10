@@ -33,7 +33,8 @@ void EnrichmentFacilityTest::InitParameters() {
   cyclus::Context* ctx = tc_.get();
 
   in_commod = "incommod";
-  out_commod = "outcommod";
+  std::string x [2] =  {"acommod", "bcommod"};
+  out_commods = std::vector<std::string>(x, x+2)  ;
 
   in_recipe = "recipe";
   feed_assay = 0.0072;
@@ -55,7 +56,7 @@ void EnrichmentFacilityTest::InitParameters() {
 void EnrichmentFacilityTest::SetUpSource() {
   src_facility->InRecipe(in_recipe);
   src_facility->in_commodity(in_commod);
-  src_facility->out_commodity(out_commod);
+  src_facility->out_commodities(out_commods);
   src_facility->TailsAssay(tails_assay);
   src_facility->FeedAssay(feed_assay);
   src_facility->SetMaxInventorySize(inv_size);
@@ -105,7 +106,10 @@ EnrichmentFacilityTest::DoEnrich(cyclus::Material::Ptr mat, double qty) {
 TEST_F(EnrichmentFacilityTest, InitialState) {
   EXPECT_EQ(in_recipe, src_facility->InRecipe());
   EXPECT_EQ(in_commod, src_facility->in_commodity());
-  EXPECT_EQ(out_commod, src_facility->out_commodity());
+  //  for (int i = 0 ; i < out_commods.size() ; ++i) {
+  //    EXPECT_EQ(out_commods[i],src_facility->out_commodities()[i])
+  //  }
+  EXPECT_EQ(out_commods, src_facility->out_commodities());
   EXPECT_DOUBLE_EQ(tails_assay, src_facility->TailsAssay());
   EXPECT_DOUBLE_EQ(feed_assay, src_facility->FeedAssay());
   EXPECT_DOUBLE_EQ(inv_size, src_facility->MaxInventorySize());
@@ -117,6 +121,7 @@ TEST_F(EnrichmentFacilityTest, InitialState) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 TEST_F(EnrichmentFacilityTest, DISABLED_XMLInit) {
   std::stringstream ss;
+
   ss << "<start>"
      << "<name>fooname</name>"
      << "<config>"
@@ -127,7 +132,10 @@ TEST_F(EnrichmentFacilityTest, DISABLED_XMLInit) {
      << "    <inventorysize>" << inv_size << "</inventorysize>"
      << "  </input>"
      << "  <output>"
-     << "    <outcommodity>" << out_commod << "</outcommodity>"
+     << "  <commodities>"
+     << "    <outcommodity>" << out_commods[0] << "</outcommodity>"
+     << "    <outcommodity>" << out_commods[1] << "</outcommodity>"
+     << "  </commodities>"
      << "    <tails_assay>" << tails_assay << "</tails_assay>"
      << "    <swu_capacity>" << swu_capacity << "</swu_capacity>"
      << "  </output>"
@@ -143,10 +151,10 @@ TEST_F(EnrichmentFacilityTest, DISABLED_XMLInit) {
   cyclus::InfileTree engine(p);
   cycamore::EnrichmentFacility fac(tc_.get());
 
-  // EXPECT_NO_THROW(fac.InitFrom(&engine););
+   // EXPECT_NO_THROW(fac.InitFrom(&engine););
   EXPECT_EQ(in_recipe, fac.InRecipe());
   EXPECT_EQ(in_commod, fac.in_commodity());
-  EXPECT_EQ(out_commod, fac.out_commodity());
+  EXPECT_EQ(out_commods, fac.out_commodities());
   EXPECT_DOUBLE_EQ(tails_assay, fac.TailsAssay());
   EXPECT_DOUBLE_EQ(feed_assay, fac.FeedAssay());
   EXPECT_DOUBLE_EQ(inv_size, fac.MaxInventorySize());
@@ -164,7 +172,7 @@ TEST_F(EnrichmentFacilityTest, Clone) {
 
   EXPECT_EQ(in_recipe, cloned_fac->InRecipe());
   EXPECT_EQ(in_commod, cloned_fac->in_commodity());
-  EXPECT_EQ(out_commod, cloned_fac->out_commodity());
+  EXPECT_EQ(out_commods, cloned_fac->out_commodities());
   EXPECT_DOUBLE_EQ(tails_assay, cloned_fac->TailsAssay());
   EXPECT_DOUBLE_EQ(feed_assay, cloned_fac->FeedAssay());
   EXPECT_DOUBLE_EQ(inv_size, cloned_fac->MaxInventorySize());
@@ -414,12 +422,12 @@ EnrichmentFacilityTest::GetContext(int nreqs, int nvalid) {
       ec(new ExchangeContext<Material>());
   for (int i = 0; i < nvalid; i++) {
     ec->AddRequest(
-        Request<Material>::Create(GetReqMat(1.0, 0.05), trader, out_commod));
+        Request<Material>::Create(GetReqMat(1.0, 0.05), trader, out_commods[0]));
   }
   for (int i = 0; i < nreqs - nvalid; i++) {
     ec->AddRequest(
         // get_mat returns a material of only u235, which is not valid
-        Request<Material>::Create(get_mat(), trader, out_commod));
+        Request<Material>::Create(get_mat(), trader, out_commods[0]));
   }
   return ec;
 }
@@ -559,7 +567,7 @@ TEST_F(EnrichmentFacilityTest, Response) {
   DoAddMat(GetMat(natu_req * 2));
 
   Request<Material>* req =
-      Request<Material>::Create(target, trader, out_commod);
+      Request<Material>::Create(target, trader, out_commods[0]);
   Bid<Material>* bid = Bid<Material>::Create(req, target, src_facility);
   Trade<Material> trade(req, bid, trade_qty);
   trades.push_back(trade);

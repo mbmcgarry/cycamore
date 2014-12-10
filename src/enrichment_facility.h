@@ -199,7 +199,7 @@ class EnrichmentFacility : public cyclus::Facility {
 
   inline void out_commodities(std::vector<std::string> out_com) {
     out_commods = out_com;
-    )} 
+    } 
 
   inline const std::vector<std::string>&
     out_commodities() const { return out_commods; } 

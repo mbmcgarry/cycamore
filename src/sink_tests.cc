@@ -185,6 +185,10 @@ TEST_F(SinkTest, Print) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 TEST(SinkTest, InRecipe){
   // Create a context
+  using cyclus::RequestPortfolio;
+  using cyclus::Material;
+  using cyclus::Request;
+
   cyclus::Recorder rec;
   cyclus::Timer ti;
   cyclus::Context ctx(&ti, &rec);
@@ -197,21 +201,22 @@ TEST(SinkTest, InRecipe){
   ctx.AddRecipe("some_u",c) ;
 
   // create a sink facility to interact with the DRE
-  //  cyclus::Agent* snk = new SinkFacility(&ctx);
-  cyclus::Agent* snk = new cycamore::Sink::Sink(&ctx);
-  snk->recipe("some_u");
-  snk->AddCommodity("u_commod");
- 
+  cycamore::Sink* snk = new cycamore::Sink(&ctx);
+  snk->AddCommodity("some_u");
+  
   std::set<RequestPortfolio<Material>::Ptr> ports = 
     snk->GetMatlRequests();
-  
-  std::vector<Request<Material>*>&::iterator it =
-    ports.begin()->get()->requests();
-  std::vector<cyclus::Request<cyclus::Material>*> reqs = *it;
-  
-  cyclus::Material::Ptr mat = reqs[0]->target();
-  EXPECT_EQ(mat->comp(), c); 
 
+  ASSERT_EQ(ports.size(), 1);
+
+  const std::vector<Request<Material>*>& requests =
+    ports.begin()->get()->requests();
+  ASSERT_EQ(requests.size(), 1);
+
+  Request<Material>* req = *requests.begin();
+
+  EXPECT_EQ(req->requester(), snk);
+  EXPECT_EQ(req->commodity(),"some_u");
 }
 
 

@@ -19,7 +19,7 @@ EnrichmentFacility::EnrichmentFacility(cyclus::Context* ctx)
       initial_reserves(0),
       in_commod(""),
       in_recipe(""),
-      out_commods("") {}
+      out_commods() {}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 EnrichmentFacility::~EnrichmentFacility() {}
@@ -27,13 +27,23 @@ EnrichmentFacility::~EnrichmentFacility() {}
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 std::string EnrichmentFacility::str() {
   std::stringstream ss;
+
+  std::string out_commod_msg = "";
+  out_commod_msg += " * Output cyclus::Commodities: " ;
+  for (std::vector<std::string>::iterator commod = out_commods.begin();
+       commod != out_commods.end();
+       commod++) {
+    out_commod_msg += (commod == out_commods.begin() ? "{" : ", ");
+    out_commod_msg += (*commod);
+  }
+
   ss << cyclus::Facility::str()
      << " with enrichment facility parameters:"
      << " * SWU capacity: " << SwuCapacity()
      << " * Tails assay: " << TailsAssay()
      << " * Feed assay: " << FeedAssay()
      << " * Input cyclus::Commodity: " << in_commodity()
-     << " * Output cyclus::Commodity: " << out_commodities();
+     << out_commod_msg ;
   return ss.str();
 }
 
@@ -120,13 +130,13 @@ EnrichmentFacility::GetMatlBids(
   
   for (std::vector<std::string>::iterator commod = out_commods.begin();
        commod != out_commods.end();
-       commod++) {
-    if (commod_requests.count(commod) == 0) {
+       ++commod) {
+    if (commod_requests.count(*commod) == 0) {
       continue;
     }
   
     std::vector<Request<Material>*>& requests =
-      commod_requests[commod];
+      commod_requests[*commod];
     
     std::vector<Request<Material>*>::iterator it;
     for (it = requests.begin(); it != requests.end(); ++it) {
@@ -136,7 +146,7 @@ EnrichmentFacility::GetMatlBids(
 	port->AddBid(req, offer, this);
       }
     }
-  }
+  } //for each out commod
   
   Converter<Material>::Ptr sc(new SWUConverter(feed_assay, tails_assay));
   Converter<Material>::Ptr nc(new NatUConverter(feed_assay, tails_assay));
@@ -181,9 +191,7 @@ void EnrichmentFacility::GetMatlTrades(
     LOG(cyclus::LEV_INFO5, "EnrFac") << prototype()
 				     << " just received an order"
 				     << " for " << it->amt
-      //				     << " of " <<  out_commods.front()
-				     << " of " << it->bid->request->commodity() ;
-    //				     << " of " <<  cyclus::Request<*it>::commodity() ;
+				     << " of " << it->bid->request()->commodity() ;
   }
 
   if (cyclus::IsNegative(current_swu_capacity)) {
