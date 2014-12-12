@@ -600,8 +600,112 @@ TEST_F(EnrichmentFacilityTest, Response) {
   EXPECT_DOUBLE_EQ(src_facility->CurrentSwuCapacity(), swu_req);
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+TEST_F(EnrichmentFacilityTest, TwoCommodResponse) {
+  // this test asks the facility to fufill multiple requests for different uranium
+  // enrichment levels. Two requests are provided, whose total is less than the swu capacity of
+  // the facility while not exceeding its inventory capacity 
+  //
+  using cyclus::Bid;
+  using cyclus::CompMap;
+  using cyclus::Composition;
+  using cyclus::Material;
+  using cyclus::Request;
+  using cyclus::Trade;
+  using cyclus::toolkit::MatQuery;
+  using cyclus::toolkit::Assays;
+  using cyclus::toolkit::FeedQty;
+  using cyclus::toolkit::SwuRequired;
+  using cyclus::toolkit::UraniumAssay;
+  using test_helpers::get_mat;
+
+  // problem set up
+  std::vector< cyclus::Trade<cyclus::Material> > trades;
+  std::vector<std::pair<cyclus::Trade<cyclus::Material>,
+                        cyclus::Material::Ptr> > responses;
+
+  double qty1 = 5;  // 5 kg
+  double trade_qty1 = qty1;
+  double product_assay1 = 0.04;  
+  double qty2 = 1;  // 1 kg
+  double trade_qty2 = qty2;
+  double product_assay2 = 0.20;  
+
+  cyclus::CompMap v1;
+  v1[922350000] = product_assay1;
+  v1[922380000] = 1 - product_assay1;
+  // target qty need not be = to request qty
+  Material::Ptr target1 = cyclus::Material::CreateUntracked(
+      qty1 + 10, cyclus::Composition::CreateFromMass(v1));
+
+  cyclus::CompMap v2;
+  v2[922350000] = product_assay2;
+  v2[922380000] = 1 - product_assay2;
+  // target qty need not be = to request qty
+  Material::Ptr target2 = cyclus::Material::CreateUntracked(
+      qty2 + 10, cyclus::Composition::CreateFromMass(v2));
+
+  Assays assays1(feed_assay, UraniumAssay(target1), tails_assay);
+  Assays assays2(feed_assay, UraniumAssay(target2), tails_assay);
+  double swu_req = SwuRequired(qty1, assays1) + SwuRequired(qty2, assays2) ;
+  double natu_req = FeedQty(qty1, assays1)+FeedQty(qty2, assays2);
+
+  src_facility->SetMaxInventorySize(natu_req * 4);  // not capacitated by nat u
+  src_facility->SwuCapacity(swu_req);  // swu capacitated
+
+  // Null response
+  src_facility->GetMatlTrades(trades, responses);
+  EXPECT_NO_THROW();
+  EXPECT_EQ(responses.size(), 0);
+
+  // set up state
+  DoAddMat(GetMat(natu_req * 2));
+
+  Request<Material>* req1 =
+      Request<Material>::Create(target1, trader, out_commods[0]);
+  Bid<Material>* bid1 = Bid<Material>::Create(req1, target1, src_facility);
+  Trade<Material> trade1(req1, bid1, trade_qty1);
+  trades.push_back(trade1);
+
+ Request<Material>* req2 =
+      Request<Material>::Create(target2, trader, out_commods[1]);
+  Bid<Material>* bid2 = Bid<Material>::Create(req2, target2, src_facility);
+  Trade<Material> trade2(req2, bid2, trade_qty2);
+  trades.push_back(trade2);
+
+  // 2 trades, SWU = SWU cap
+  ASSERT_DOUBLE_EQ(src_facility->CurrentSwuCapacity(), swu_req);
+  src_facility->GetMatlTrades(trades, responses);
+  ASSERT_EQ(responses.size(), 2);
+
+  EXPECT_DOUBLE_EQ(src_facility->CurrentSwuCapacity(),
+                   swu_req - SwuRequired(trade_qty1, assays1) -
+		   SwuRequired(trade_qty2, assays2));
+
+  // 2 trades, 2 responses
+
+  //  trades.push_back(trade);
+  //  responses.clear();
+  //  EXPECT_NO_THROW(src_facility->GetMatlTrades(trades, responses));
+  //   EXPECT_EQ(responses.size(), 2);
+  //  EXPECT_TRUE(cyclus::AlmostEq(src_facility->CurrentSwuCapacity(), 0));
+
+  // // too much qty, capn!
+  // trade = Trade<Material>(req, bid, 1);  // a small number
+  // trades.clear();
+  // trades.push_back(trade);
+  // EXPECT_THROW(src_facility->GetMatlTrades(trades, responses),
+  //              cyclus::ValueError);
+
+  // reset!
+  src_facility->Tick();
+  EXPECT_DOUBLE_EQ(src_facility->CurrentSwuCapacity(), swu_req);
+}
+
 }  // namespace cycamore
 
+//
+//
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 cyclus::Agent* EnrichmentFacilityConstructor(cyclus::Context* ctx) {
   return new cycamore::EnrichmentFacility(ctx);
