@@ -183,7 +183,7 @@ TEST_F(SinkTest, Print) {
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-TEST(SinkTest, InRecipe){
+TEST_F(SinkTest, InRecipe){
   // Create a context
   using cyclus::RequestPortfolio;
   using cyclus::Material;
