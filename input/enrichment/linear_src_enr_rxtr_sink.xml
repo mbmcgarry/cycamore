@@ -34,7 +34,9 @@
         <in_commod>natl_u</in_commod>
         <in_recipe>natl_u</in_recipe>
         <max_inv_size>1000</max_inv_size>
-        <out_commod>enriched_u</out_commod>
+	<out_commods>
+          <val>enriched_u</val>
+	</out_commods>
         <tails_assay>0.003</tails_assay>
       </EnrichmentFacility>
     </config>
