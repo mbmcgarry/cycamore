@@ -9,8 +9,8 @@ import re
 def main():
     """This function finds input files, runs them, and prints a summary"""
     flag = check_inputs()
-    input_path = "/home/mbmcgarry/git/cycamore/../input"
-    cyclus_path =  "/home/mbmcgarry/.local/include/cyclus/../../bin/cyclus"
+    input_path = "/Users/mbmcgarry/git/cycamore/../input"
+    cyclus_path =  "/Users/mbmcgarry/.local/include/cyclus/../../bin/cyclus"
     files, catalogs, catalognames = get_files(input_path)
     copy_catalogs(catalogs,cyclus_path.strip("cyclus"))
     summ = Summary()

@@ -180,6 +180,13 @@ class Sink : public cyclus::Facility  {
                              "requests"}
   std::string recipe_name;
 
+  //***
+  #pragma cyclus var {"default": 0, "tooltip": "social behavior" ,	\
+                      "doc": "if set to 1 then enable social behavior "	\
+                             "in trade decisions"}
+  bool social_behav;
+  //***
+
   /// max inventory size
   #pragma cyclus var {"default": 1e299, \
                       "tooltip": "sink maximum inventory size", \

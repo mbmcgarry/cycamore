@@ -16,6 +16,7 @@ EnrichmentFacility::EnrichmentFacility(cyclus::Context* ctx)
       tails_assay(0),
       feed_assay(0),
       swu_capacity(0),
+      social_behav(0), //***
       initial_reserves(0),
       in_commod(""),
       in_recipe(""),
@@ -120,8 +121,15 @@ EnrichmentFacility::GetMatlBids(
   using cyclus::Material;
   using cyclus::Request;
 
-
   std::set<BidPortfolio<Material>::Ptr> ports;
+  // *** Add to modify preferences for specific timesteps ***//
+  if (social_behav) {
+    int cur_time = context()->time();
+    //  only trade on every 5th timestep
+    if (cur_time % 5 != 0) {
+      return ports; 
+    }
+  }    
   if (inventory.quantity() <= 0) {
     return ports;
   }

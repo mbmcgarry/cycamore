@@ -293,6 +293,12 @@ class EnrichmentFacility : public cyclus::Facility {
                              "enrichment facility at the beginning of the " \
                              "simulation"}
   double initial_reserves;
+  //***
+  #pragma cyclus var {"default": 0, "tooltip": "social behavior" ,	\
+                      "doc": "if set to 1 then enable social behavior "	\
+                             "in trade decisions"}
+  bool social_behav;
+  //***
   #pragma cyclus var {'derived_init': 'current_swu_capacity = swu_capacity;'}
   double current_swu_capacity;
   #pragma cyclus var {\

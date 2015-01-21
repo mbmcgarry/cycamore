@@ -11,6 +11,7 @@ namespace cycamore {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Sink::Sink(cyclus::Context* ctx)
     : cyclus::Facility(ctx),
+      social_behav(0), //***
       capacity(std::numeric_limits<double>::max()) {
   SetMaxInventorySize(std::numeric_limits<double>::max());
 }
@@ -65,6 +66,14 @@ Sink::GetMatlRequests() {
   using cyclus::Composition;
 
   std::set<RequestPortfolio<Material>::Ptr> ports;
+  // *** Add to modify preferences for specific timesteps ***//
+  if (social_behav) {
+    int cur_time = context()->time();
+    //  For odd time steps, return an empty portfolio
+    if (cur_time % 2 != 0) {
+      return ports; 
+    }
+  }    
   RequestPortfolio<Material>::Ptr port(new RequestPortfolio<Material>());
   double amt = RequestAmt();
   Material::Ptr mat;
