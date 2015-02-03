@@ -16,7 +16,11 @@ EnrichmentFacility::EnrichmentFacility(cyclus::Context* ctx)
       tails_assay(0),
       feed_assay(0),
       swu_capacity(0),
+<<<<<<< Updated upstream
       social_behav(0), //***
+=======
+      max_enrich(0),  ///QQ
+>>>>>>> Stashed changes
       initial_reserves(0),
       in_commod(""),
       in_recipe(""),

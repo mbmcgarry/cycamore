@@ -229,11 +229,20 @@ class EnrichmentFacility : public cyclus::Facility {
     swu_capacity = capacity;
     current_swu_capacity = swu_capacity;
   }
+<<<<<<< Updated upstream
+=======
+  inline void MaxEnrich(double enrichment) { max_enrich_ = enrichment; } //QQ
 
+>>>>>>> Stashed changes
   inline double SwuCapacity() const { return swu_capacity; }
 
   inline double CurrentSwuCapacity() const { return current_swu_capacity; }
 
+<<<<<<< Updated upstream
+=======
+  inline double MaxEnrich() const { return max_enrich; } ///QQ
+
+>>>>>>> Stashed changes
   /// @brief this facility's initial conditions
   inline void  InitialReserves(double qty) { initial_reserves = qty; }
   inline double InitialReserves() const { return initial_reserves; }
@@ -288,6 +297,14 @@ class EnrichmentFacility : public cyclus::Facility {
                       "doc": "maximum inventory capacity of natural uranium in " \
                              "the enrichment facility"}
   double max_inv_size;
+<<<<<<< Updated upstream
+
+=======
+  #pragma cyclus var {"default": 100, "tooltip": "maximum allowed percent enrichment", \
+                      "doc": "maximum allowed percent enrichment of uranium product " \
+                             "in the enrichment facility"}  ///QQ 
+  double enrich_capacity; //QQ
+>>>>>>> Stashed changes
   #pragma cyclus var {"default": 0, "tooltip": "initial uranium reserves", \
                       "doc": "amount of natural uranium stored at the " \
                              "enrichment facility at the beginning of the " \
