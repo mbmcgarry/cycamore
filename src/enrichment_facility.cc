@@ -16,11 +16,7 @@ EnrichmentFacility::EnrichmentFacility(cyclus::Context* ctx)
       tails_assay(0),
       feed_assay(0),
       swu_capacity(0),
-<<<<<<< Updated upstream
       social_behav(0), //***
-=======
-      max_enrich(0),  ///QQ
->>>>>>> Stashed changes
       initial_reserves(0),
       in_commod(""),
       in_recipe(""),
@@ -130,8 +126,11 @@ EnrichmentFacility::GetMatlBids(
   if (social_behav) {
     int cur_time = context()->time();
     //  only trade on every 5th timestep
-    if (cur_time % 5 != 0) {
-      return ports; 
+    int interval = 5 ;
+    if (EveryXTimestep_(cur_time, interval)) {
+      return ports;
+    //    if (cur_time % 5 != 0) {
+    //      return ports; 
     }
   }    
   if (inventory.quantity() <= 0) {
@@ -343,10 +342,14 @@ void EnrichmentFacility::RecordEnrichment_(double natural_u, double swu) {
       ->AddVal("SWU", swu)
       ->Record();
 }
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+bool EnrichmentFacility::EveryXTimestep_(int curr_time, int interval) {
+  return curr_time % interval != 0;
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 extern "C" cyclus::Agent* ConstructEnrichmentFacility(cyclus::Context* ctx) {
   return new EnrichmentFacility(ctx);
 }
-
+  
 }  // namespace cycamore
