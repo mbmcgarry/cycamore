@@ -193,6 +193,13 @@ class EnrichmentFacility : public cyclus::Facility {
   ///  @return true if the above description is met by the material
   bool ValidReq(const cyclus::Material::Ptr mat);
 
+ ///  @brief Determines if a particular request will be responded to
+  ///  based on user specification such as maximum allowed enrichment
+  ///  or other behavior parameters.
+  virtual cyclus::BidPortfolio<cyclus::Material>::Ptr
+    ConsiderMatlRequests(cyclus::CommodMap<cyclus::Material>::type&
+		     commod_requests);
+
   inline void in_commodity(std::string in_com) { in_commod = in_com; }
 
   inline std::string in_commodity() const { return in_commod; }
@@ -261,7 +268,7 @@ class EnrichmentFacility : public cyclus::Facility {
   ///   @brief records and enrichment with the cyclus::Recorder
   void RecordEnrichment_(double natural_u, double swu);
 
-  bool EveryXTimestep_(int curr_time, int interval);
+  //  bool EveryXTimestep(int curr_time, int interval);
   
   #pragma cyclus var {"tooltip": "input commodity", \
                       "doc": "commodity that the enrichment facility accepts", \

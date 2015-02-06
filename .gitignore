@@ -8,3 +8,4 @@ suffix.h
 *.pyc
 rs.cred
 *.h5
+src/meg_old_tests/

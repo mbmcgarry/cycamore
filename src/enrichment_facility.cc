@@ -1,5 +1,6 @@
 // Implements the EnrichmentFacility class
 #include "enrichment_facility.h"
+#include "behavior_functions.h"
 
 #include <algorithm>
 #include <cmath>
@@ -121,44 +122,26 @@ EnrichmentFacility::GetMatlBids(
   using cyclus::Material;
   using cyclus::Request;
 
-  std::set<BidPortfolio<Material>::Ptr> ports;
-  // *** Add to modify preferences for specific timesteps ***//
+  std::set<BidPortfolio<Material>::Ptr> all_ports;
+/*
+  // returns empty portfolio for all bids at certain timesteps
   if (social_behav) {
     int cur_time = context()->time();
     //  only trade on every 5th timestep
     int interval = 5 ;
-    if (EveryXTimestep_(cur_time, interval)) {
+    if (EveryXTimestep(cur_time, interval)) {
       return ports;
     //    if (cur_time % 5 != 0) {
-    //      return ports; 
+    //      return all_ports; 
     }
   }    
+*/
   if (inventory.quantity() <= 0) {
-    return ports;
+    return all_ports;
   }
-  
-  BidPortfolio<Material>::Ptr port(new BidPortfolio<Material>());
-  
-  for (std::vector<std::string>::iterator commod = out_commods.begin();
-       commod != out_commods.end();
-       ++commod) {
-    if (commod_requests.count(*commod) == 0) {
-      continue;
-    }
-  
-    std::vector<Request<Material>*>& requests =
-      commod_requests[*commod];
+
+  BidPortfolio<Material>::Ptr port = ConsiderMatlRequests(commod_requests);
     
-    std::vector<Request<Material>*>::iterator it;
-    for (it = requests.begin(); it != requests.end(); ++it) {
-      Request<Material>* req = *it;
-      if (ValidReq(req->target())) {
-	Material::Ptr offer = Offer_(req->target());
-	port->AddBid(req, offer, this);
-      }
-    }
-  } //for each out commod
-  
   Converter<Material>::Ptr sc(new SWUConverter(feed_assay, tails_assay));
   Converter<Material>::Ptr nc(new NatUConverter(feed_assay, tails_assay));
   CapacityConstraint<Material> swu(swu_capacity, sc);
@@ -172,9 +155,9 @@ EnrichmentFacility::GetMatlBids(
   LOG(cyclus::LEV_INFO5, "EnrFac") << prototype()
 				   << " adding a natu constraint of "
 				   << natu.capacity(); 
-  ports.insert(port);
+  all_ports.insert(port);
   
-  return ports;
+  return all_ports;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -343,8 +326,63 @@ void EnrichmentFacility::RecordEnrichment_(double natural_u, double swu) {
       ->Record();
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-bool EnrichmentFacility::EveryXTimestep_(int curr_time, int interval) {
+/*  
+bool EnrichmentFacility::EveryXTimestep(int curr_time, int interval) {
   return curr_time % interval != 0;
+}
+*/
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Decide whether each individual bid will be responded to.
+cyclus::BidPortfolio<cyclus::Material>::Ptr
+EnrichmentFacility::ConsiderMatlRequests(
+  cyclus::CommodMap<cyclus::Material>::type& commod_requests) {
+  using cyclus::Bid;
+  using cyclus::BidPortfolio;
+  using cyclus::Material;
+  using cyclus::Request;
+
+  //  std::set<BidPortfolio<Material>::Ptr> ports;
+  
+  BidPortfolio<Material>::Ptr port(new BidPortfolio<Material>());
+  
+  for (std::vector<std::string>::iterator commod = out_commods.begin();
+       commod != out_commods.end();
+       ++commod) {
+    if (commod_requests.count(*commod) == 0) {
+      continue;
+    }
+  
+    std::vector<Request<Material>*>& requests =
+      commod_requests[*commod];
+    
+    std::vector<Request<Material>*>::iterator it;
+    for (it = requests.begin(); it != requests.end(); ++it) {
+      Request<Material>* req = *it;
+      /* add check that request is desirable */
+      Material::Ptr mat = Request_();
+      double enrich_limit ;
+      /*      if (social_behav) {
+	    enrich_limit = 0.1 ;  // do not trade to facilities that want HEU
+      } else {
+	enrich_limit = 1.0 ;
+      }
+      */
+      enrich_limit = 0.1;
+      double request_enrich = cyclus::toolkit::UraniumAssay(mat) ;
+      int cur_time = context()->time();
+      int interval = 5 ;      //  only trade on every 5th timestep
+      if (ValidReq(req->target())) {  // This check is always done
+	if ((request_enrich <= enrich_limit)   // LEU facility
+	    || (EveryXTimestep(cur_time, interval))) // HEU every 5th time
+	  {
+	    Material::Ptr offer = Offer_(req->target());
+	    port->AddBid(req, offer, this);
+	  }
+      }
+    }
+  } //for each out commod
+
+  return port;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
