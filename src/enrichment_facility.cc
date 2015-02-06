@@ -6,6 +6,7 @@
 #include <cmath>
 #include <limits>
 #include <sstream>
+#include <iostream>
 
 #include <boost/lexical_cast.hpp>
 
@@ -369,11 +370,17 @@ EnrichmentFacility::ConsiderMatlRequests(
       */
       enrich_limit = 0.1;
       double request_enrich = cyclus::toolkit::UraniumAssay(mat) ;
+      std::cout << "requested enrich is " <<request_enrich ;
+      /*      if (request_enrich == 0.0) {
+	throw cyclus::ValueError(
+				 " requested enrichment is 0.");
+      }
+      */
       int cur_time = context()->time();
       int interval = 5 ;      //  only trade on every 5th timestep
       if (ValidReq(req->target())) {  // This check is always done
-	if ((request_enrich <= enrich_limit)   // LEU facility
-	    || (EveryXTimestep(cur_time, interval))) // HEU every 5th time
+	if ((request_enrich <= enrich_limit))   // LEU facility
+	  //	    || (EveryXTimestep(cur_time, interval))) // HEU every 5th time
 	  {
 	    Material::Ptr offer = Offer_(req->target());
 	    port->AddBid(req, offer, this);
