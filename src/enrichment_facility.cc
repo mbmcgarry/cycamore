@@ -360,7 +360,8 @@ EnrichmentFacility::ConsiderMatlRequests(
     for (it = requests.begin(); it != requests.end(); ++it) {
       Request<Material>* req = *it;
       /* add check that request is desirable */
-      Material::Ptr mat = Request_();
+      Material::Ptr mat = req->target();
+      //Material::Ptr mat = Request_();
       double enrich_limit ;
       /*      if (social_behav) {
 	    enrich_limit = 0.1 ;  // do not trade to facilities that want HEU
