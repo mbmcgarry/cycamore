@@ -268,8 +268,6 @@ class EnrichmentFacility : public cyclus::Facility {
   ///   @brief records and enrichment with the cyclus::Recorder
   void RecordEnrichment_(double natural_u, double swu);
 
-  //  bool EveryXTimestep(int curr_time, int interval);
-  
   #pragma cyclus var {"tooltip": "input commodity", \
                       "doc": "commodity that the enrichment facility accepts", \
                       "uitype": "incommodity"}

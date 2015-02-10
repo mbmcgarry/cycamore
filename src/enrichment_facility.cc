@@ -327,12 +327,6 @@ void EnrichmentFacility::RecordEnrichment_(double natural_u, double swu) {
       ->Record();
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-/*  
-bool EnrichmentFacility::EveryXTimestep(int curr_time, int interval) {
-  return curr_time % interval != 0;
-}
-*/
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Decide whether each individual bid will be responded to.
 cyclus::BidPortfolio<cyclus::Material>::Ptr
 EnrichmentFacility::ConsiderMatlRequests(
@@ -342,8 +336,6 @@ EnrichmentFacility::ConsiderMatlRequests(
   using cyclus::Material;
   using cyclus::Request;
 
-  //  std::set<BidPortfolio<Material>::Ptr> ports;
-  
   BidPortfolio<Material>::Ptr port(new BidPortfolio<Material>());
   
   for (std::vector<std::string>::iterator commod = out_commods.begin();
@@ -359,9 +351,7 @@ EnrichmentFacility::ConsiderMatlRequests(
     std::vector<Request<Material>*>::iterator it;
     for (it = requests.begin(); it != requests.end(); ++it) {
       Request<Material>* req = *it;
-      /* add check that request is desirable */
       Material::Ptr mat = req->target();
-      //Material::Ptr mat = Request_();
       double enrich_limit ;
       /*      if (social_behav) {
 	    enrich_limit = 0.1 ;  // do not trade to facilities that want HEU
@@ -371,17 +361,11 @@ EnrichmentFacility::ConsiderMatlRequests(
       */
       enrich_limit = 0.1;
       double request_enrich = cyclus::toolkit::UraniumAssay(mat) ;
-      std::cout << "requested enrich is " <<request_enrich ;
-      /*      if (request_enrich == 0.0) {
-	throw cyclus::ValueError(
-				 " requested enrichment is 0.");
-      }
-      */
       int cur_time = context()->time();
       int interval = 5 ;      //  only trade on every 5th timestep
       if (ValidReq(req->target())) {  // This check is always done
-	if ((request_enrich <= enrich_limit))   // LEU facility
-	  //        || (EveryXTimestep(cur_time, interval))) // HEU every 5th time
+	if ((request_enrich <= enrich_limit)   // LEU facility
+	          || (EveryXTimestep(cur_time, interval))) // HEU every 5th time
 	  {
 	    Material::Ptr offer = Offer_(req->target());
 	    port->AddBid(req, offer, this);

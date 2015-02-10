@@ -21,6 +21,7 @@ USE_CYCLUS("cycamore" "growth_region")
 # MBM Behavior Functions
 SET(cycamore_CC ${cycamore_CC} behavior_functions.cc)
 SET(cycamore_H ${cycamore_H} behavior_functions.h)
+SET(cycamore_TEST_CC ${cycamore_TEST_CC} "${CMAKE_CURRENT_SOURCE_DIR}/behavior_functions.cc")
 
 INSTALL_CYCLUS_MODULE("cycamore" "" "NONE")
 

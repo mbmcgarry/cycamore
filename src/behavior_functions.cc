@@ -1,4 +1,4 @@
-
+#include "behavior_functions.h"
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 bool EveryXTimestep(int curr_time, int interval) {
