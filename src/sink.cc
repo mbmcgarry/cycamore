@@ -5,6 +5,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "sink.h"
+#include "behavior_functions.h"
 
 namespace cycamore {
 
@@ -67,13 +68,31 @@ Sink::GetMatlRequests() {
 
   std::set<RequestPortfolio<Material>::Ptr> ports;
   // *** Add to modify preferences for specific timesteps ***//
+
+  /*
   if (social_behav) {
     int cur_time = context()->time();
     //  For odd time steps, return an empty portfolio
     if (cur_time % 2 != 0) {
       return ports; 
     }
-  }    
+  } 
+  */
+  // Want opposite behavior of EF.  Return EMPTY port if
+  // conditions are not met.
+  if (social_behav) {
+
+    int cur_time = context()->time();
+    int interval = 2 ;
+
+    if (!EveryXTimestep(cur_time, interval)) // HEU every 5th time
+    //	  || (!EveryRandomXTimestep(interval)) // HEU randomly one in 5 times
+      {
+	return ports; 
+      }
+  }
+
+  // if NOT social behavior, then respond to all requests
   RequestPortfolio<Material>::Ptr port(new RequestPortfolio<Material>());
   double amt = RequestAmt();
   Material::Ptr mat;
