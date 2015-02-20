@@ -83,10 +83,10 @@ Sink::GetMatlRequests() {
   if (social_behav) {
 
     int cur_time = context()->time();
-    int interval = 2 ;
-
-    if (!EveryXTimestep(cur_time, interval)) // HEU every 5th time
-    //	  || (!EveryRandomXTimestep(interval)) // HEU randomly one in 5 times
+    int interval = 5 ;
+    
+    //    if (!EveryXTimestep(cur_time, interval)) // HEU every 5th time
+    if (!EveryRandomXTimestep(interval)) // HEU randomly one in 5 times
       {
 	return ports; 
       }

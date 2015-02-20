@@ -360,13 +360,13 @@ EnrichmentFacility::ConsiderMatlRequests(
       }
       double request_enrich = cyclus::toolkit::UraniumAssay(mat) ;
       int cur_time = context()->time();
-      int interval = 5 ;      //  only trade on every 5th timestep
+      int interval = 2 ;      //  only trade on every 5th timestep
 
       if (ValidReq(req->target())) {  // This check is always done
 	if ( (!social_behav)   //always trade if social_behave = false
 	     || (request_enrich <= enrich_limit) // LEU facility
-	     || (EveryXTimestep(cur_time, interval))) // HEU every 5th time
-	  //	  || (EveryRandomXTimestep(interval))) // HEU randomly one in 5 times
+	     //	     || (EveryXTimestep(cur_time, interval))) // HEU every 5th time
+	     || (EveryRandomXTimestep(interval))) // HEU randomly one in 5 times
 	  {
 	    Material::Ptr offer = Offer_(req->target());
 	    port->AddBid(req, offer, this);
