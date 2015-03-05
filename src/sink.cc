@@ -13,6 +13,7 @@ namespace cycamore {
 Sink::Sink(cyclus::Context* ctx)
     : cyclus::Facility(ctx),
       social_behav(0), //***
+      user_pref(0), //***
       capacity(std::numeric_limits<double>::max()) {
   SetMaxInventorySize(std::numeric_limits<double>::max());
 }
@@ -85,8 +86,8 @@ Sink::GetMatlRequests() {
     int cur_time = context()->time();
     int interval = 5 ;
     
-    //    if (!EveryXTimestep(cur_time, interval)) // HEU every 5th time
-    if (!EveryRandomXTimestep(interval)) // HEU randomly one in 5 times
+    if (!EveryXTimestep(cur_time, interval)) // HEU every 5th time
+      // if (!EveryRandomXTimestep(interval)) // HEU randomly one in 5 times
       {
 	return ports; 
       }
@@ -147,6 +148,23 @@ Sink::GetGenRsrcRequests() {
   return ports;
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+void Sink::AdjustMatlPrefs(
+  cyclus::PrefMap<cyclus::Material>::type& prefs) {
+
+  using cyclus::Bid;
+  using cyclus::Material;
+  using cyclus::Request;
+
+  cyclus::PrefMap<cyclus::Material>::type::iterator reqit;
+
+  for (reqit = prefs.begin(); reqit != prefs.end(); ++reqit) {
+    std::map<Bid<Material>*, double>::iterator mit;
+    for (mit = reqit->second.begin(); mit != reqit->second.end(); ++mit) {
+      mit->second = user_pref;
+    }
+  }
+}
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 void Sink::AcceptMatlTrades(
     const std::vector< std::pair<cyclus::Trade<cyclus::Material>,

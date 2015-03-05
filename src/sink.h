@@ -117,6 +117,10 @@ class Sink : public cyclus::Facility  {
   virtual std::set<cyclus::RequestPortfolio<cyclus::Product>::Ptr>
       GetGenRsrcRequests();
 
+  /// @brief Change preference for requests from this facility as
+  /// defined by input (user_prefs state var)
+  virtual void AdjustMatlPrefs(cyclus::PrefMap<cyclus::Material>::type& prefs);
+ 
   /// @brief SinkFacilities place accepted trade Materials in their Inventory
   virtual void AcceptMatlTrades(
       const std::vector< std::pair<cyclus::Trade<cyclus::Material>,
@@ -185,7 +189,11 @@ class Sink : public cyclus::Facility  {
                       "doc": "if set to 1 then enable social behavior "	\
                              "in trade decisions"}
   bool social_behav;
-  //***
+ #pragma cyclus var {"default": 0, "tooltip": "user-definied preference" ,\
+                      "doc": "change the default preference for requests "\
+                             "from this agent"}
+  int user_pref;
+   //***
 
   /// max inventory size
   #pragma cyclus var {"default": 1e299, \
