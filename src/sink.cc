@@ -86,8 +86,8 @@ Sink::GetMatlRequests() {
     int cur_time = context()->time();
     int interval = 5 ;
     
-    if (!EveryXTimestep(cur_time, interval)) // HEU every 5th time
-      // if (!EveryRandomXTimestep(interval)) // HEU randomly one in 5 times
+    //    if (!EveryXTimestep(cur_time, interval)) // HEU every 5th time
+       if (!EveryRandomXTimestep(interval)) // HEU randomly one in 5 times
       {
 	return ports; 
       }
