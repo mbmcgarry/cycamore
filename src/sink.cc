@@ -14,9 +14,9 @@ Sink::Sink(cyclus::Context* ctx)
     : cyclus::Facility(ctx),
       social_behav(0), //***
       user_pref(0), //***
-      capacity(std::numeric_limits<double>::max()) {
-  SetMaxInventorySize(std::numeric_limits<double>::max());
-}
+      sigma(0), //***
+      max_inv_size(1e299) {}  // actually only used in header file
+
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Sink::~Sink() {}
@@ -68,17 +68,7 @@ Sink::GetMatlRequests() {
   using cyclus::Composition;
 
   std::set<RequestPortfolio<Material>::Ptr> ports;
-  // *** Add to modify preferences for specific timesteps ***//
 
-  /*
-  if (social_behav) {
-    int cur_time = context()->time();
-    //  For odd time steps, return an empty portfolio
-    if (cur_time % 2 != 0) {
-      return ports; 
-    }
-  } 
-  */
   // Want opposite behavior of EF.  Return EMPTY port if
   // conditions are not met.
   if (social_behav) {

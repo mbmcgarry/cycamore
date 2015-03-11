@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "cyclus.h"
+#include "behavior_functions.h"
 
 namespace cycamore {
 
@@ -29,8 +30,8 @@ class Context;
 ///  @section agentparams Agent Parameters
 ///  Sink behavior is comprehensively defined by the following
 ///  parameters:
-///  - double capacity: The acceptance capacity of the facility (units
-///  vary, but typically kg/month). Capacity is infinite if a positive
+///  - double capacity: The acceptance avg_qty of the facility (units
+///  vary, but typically kg/month). Avg_Qty is infinite if a positive
 ///  value is provided.
 ///  - int startDate: The date on which the facility begins to operate
 ///  (months). - int lifeTime: The length of time that the facility
@@ -39,10 +40,10 @@ class Context;
 ///  @section optionalparams Optional Parameters
 ///  Sink behavior may also be specified with the following
 ///  optional parameters which have default values listed here.
-///  - double capacityFactor: The ratio of actual acceptance capacity to
-///  the rated acceptance capacity. Default is 1 (actual/rated).
+///  - double avg_qtyFactor: The ratio of actual acceptance avg_qty to
+///  the rated acceptance avg_qty. Default is 1 (actual/rated).
 ///  - double AvailFactor: The percent of time the facility operates at
-///  its capacity factor. Default is 100%.
+///  its avg_qty factor. Default is 100%.
 ///  - double capitalCost: The cost of constructing and commissioning this
 ///  facility. Default is 0 ($).
 ///  - double opCost: The annual cost of operation and maintenance of this
@@ -55,16 +56,16 @@ class Context;
 ///  - string name: A non-generic name for this facility.
 ///
 ///  @section detailed Detailed Behavior
-///  @subsection finite If Finite Capacity:
+///  @subsection finite If Finite Avg_Qty:
 ///  The Sink starts operation when the simulation reaches the
 ///  month specified as the startDate. It immediately begins to request
 ///  the inCommod commodity type at the rate defined by the Sink
-///  capacity. If a request is matched with an offer from another
+///  avg_qty. If a request is matched with an offer from another
 ///  facility, the Sink executes that order by adding that
 ///  quantity to its stocks. When the simulation time equals the startDate
 ///  plus the lifeTime, the facility ceases to operate.
 ///
-///  @subsection infinite If Infinite Capacity:
+///  @subsection infinite If Infinite Avg_Qty:
 ///  The Sink starts operation when the simulation reaches the
 ///  month specified as the startDate. Each month the Sink
 ///  requests an infinite amount of the inCommod commodity from the
@@ -137,30 +138,14 @@ class Sink : public cyclus::Facility  {
   ///  @param name the commodity name
   inline void AddCommodity(std::string name) { in_commods.push_back(name); }
 
-  ///  sets the size of the storage inventory for received material
-  ///  @param size the storage size
-  inline void SetMaxInventorySize(double size) {
-    max_inv_size = size;
-    inventory.set_capacity(size);
-  }
-
-  /// @return the maximum inventory storage size
-  inline double MaxInventorySize() const { return inventory.capacity(); }
-
   /// @return the current inventory storage size
   inline double InventorySize() const { return inventory.quantity(); }
 
   /// determines the amount to request
-  inline double RequestAmt() const {
-    return std::min(capacity, std::max(0.0, inventory.space()));
+  double RequestAmt() const {
+    double desired_amt = RNG_NormalDist(avg_qty, sigma);
+    return std::min(desired_amt, std::max(0.0, inventory.space()));
   }
-
-  /// sets the capacity of a material generated at any given time step
-  /// @param capacity the reception capacity
-  inline void Capacity(double cap) { capacity = cap; }
-
-  /// @return the reception capacity at any given time step
-  inline double Capacity() const { return capacity; }
 
   /// @return the input commodities
   inline const std::vector<std::string>&
@@ -173,12 +158,6 @@ class Sink : public cyclus::Facility  {
                       "uitype": ["oneormore", "incommodity"]}
   std::vector<std::string> in_commods;
 
-  /// monthly acceptance capacity
-  #pragma cyclus var {"default": 1e299, "tooltip": "sink capacity", \
-                      "doc": "capacity the sink facility can " \
-                             "accept at each time step"}
-  double capacity;
-
   #pragma cyclus var {"default": "", "tooltip": "requested composition", \
                       "doc": "name of recipe to use for material " \
                              "requests"}
@@ -189,12 +168,24 @@ class Sink : public cyclus::Facility  {
                       "doc": "if set to 1 then enable social behavior "	\
                              "in trade decisions"}
   bool social_behav;
- #pragma cyclus var {"default": 0, "tooltip": "user-definied preference" ,\
+ #pragma cyclus var {"default": 0, "tooltip": "user-defined preference" ,\
                       "doc": "change the default preference for requests "\
                              "from this agent"}
   int user_pref;
-   //***
+  //***
+  /// monthly acceptance avg_qty
+  #pragma cyclus var {"default": 1e299, "tooltip": "sink avg_qty",	\
+                          "doc": "mean for the normal distribution that " \
+                                 "is sampled to determine the amount of " \
+                                 "material actually requested at each " \
+                                 "time step"}
+  double avg_qty;
 
+   #pragma cyclus var {"default": 0, "tooltip": "standard deviation",	\
+                          "doc": "standard deviation (FWHM) of the normal " \
+                                 "distribution used to generate requested " \
+                                 "amount of material (avg_qty)" }
+  double sigma;   //*** 
   /// max inventory size
   #pragma cyclus var {"default": 1e299, \
                       "tooltip": "sink maximum inventory size", \

@@ -10,11 +10,10 @@ bool EveryXTimestep(int curr_time, int interval);
 bool EveryRandomXTimestep(int frequency);
 
 
-
-
-
-
-
+// returns a randomly generated number from a
+// normal distribution defined by mean and
+// sigma (full-width-half-max)
+double RNG_NormalDist(double mean, double sigma);
 
 
 #endif  //  CYCAMORE_SRC_BEHAVIOR_FUNCTIONS_H_
