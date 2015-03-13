@@ -164,10 +164,17 @@ class Sink : public cyclus::Facility  {
   std::string recipe_name;
 
   //***
-  #pragma cyclus var {"default": 0, "tooltip": "social behavior" ,	\
-                      "doc": "if set to 1 then enable social behavior "	\
-                             "in trade decisions"}
-  bool social_behav;
+  #pragma cyclus var {"default": "None", "tooltip": "social behavior",	\
+                          "doc": "type of social behavior used in trade " \
+                                 "decisions: None, Every, Random " \
+                                 "where behav_interval describes the " \
+                                 "time interval for behavior action"}
+  std::string social_behav;
+  #pragma cyclus var {"default": 0, "tooltip": "interval for behavior" , \
+                      "doc": "interval of social behavior: Every or "\
+                             "EveryRandom.  If 0 then behavior is not " \
+                             "implemented"}
+ double behav_interval;
  #pragma cyclus var {"default": 0, "tooltip": "user-defined preference" ,\
                       "doc": "change the default preference for requests "\
                              "from this agent"}

@@ -12,7 +12,8 @@ namespace cycamore {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Sink::Sink(cyclus::Context* ctx)
     : cyclus::Facility(ctx),
-      social_behav(0), //***
+      social_behav(""), //***
+      behav_interval(0), //***
       user_pref(0), //***
       sigma(0), //***
       max_inv_size(1e299) {}  // actually only used in header file
@@ -71,18 +72,20 @@ Sink::GetMatlRequests() {
 
   // Want opposite behavior of EF.  Return EMPTY port if
   // conditions are not met.
-  if (social_behav) {
-
+  if (social_behav == "Every" && behav_interval > 0) {
     int cur_time = context()->time();
-    int interval = 5 ;
-    
-    //    if (!EveryXTimestep(cur_time, interval)) // HEU every 5th time
-       if (!EveryRandomXTimestep(interval)) // HEU randomly one in 5 times
+    if (!EveryXTimestep(cur_time, behav_interval)) // HEU every X time
       {
 	return ports; 
       }
   }
-
+  else if (social_behav == "Random" && behav_interval > 0) {
+    if (!EveryRandomXTimestep(behav_interval)) // HEU randomly one in X times
+      {
+	return ports; 
+      }
+  }
+  
   // if NOT social behavior, then respond to all requests
   RequestPortfolio<Material>::Ptr port(new RequestPortfolio<Material>());
   double amt = RequestAmt();
