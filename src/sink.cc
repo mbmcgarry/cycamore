@@ -14,6 +14,7 @@ Sink::Sink(cyclus::Context* ctx)
     : cyclus::Facility(ctx),
       social_behav(""), //***
       behav_interval(0), //***
+      fixed_seed(true), //***
       user_pref(0), //***
       sigma(0), //***
       max_inv_size(1e299) {}  // actually only used in header file
@@ -79,8 +80,9 @@ Sink::GetMatlRequests() {
 	return ports; 
       }
   }
+  // HEU randomly with a distribution centered on every X timestep
   else if (social_behav == "Random" && behav_interval > 0) {
-    if (!EveryRandomXTimestep(behav_interval)) // HEU randomly one in X times
+    if (!EveryRandomXTimestep(behav_interval, fixed_seed)) 
       {
 	return ports; 
       }
