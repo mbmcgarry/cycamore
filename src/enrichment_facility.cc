@@ -19,7 +19,6 @@ EnrichmentFacility::EnrichmentFacility(cyclus::Context* ctx)
       feed_assay(0),
       swu_capacity(0),
       social_behav(0), //***
-      fixed_seed(true),
       initial_reserves(0),
       in_commod(""),
       in_recipe(""),
@@ -367,7 +366,7 @@ EnrichmentFacility::ConsiderMatlRequests(
 	if ( (!social_behav)   //always trade if social_behave = false
 	     || (request_enrich <= enrich_limit) // LEU facility
 	     //   || (EveryXTimestep(cur_time, interval))) // HEU every 5th time
-	     || (EveryRandomXTimestep(interval, fixed_seed))) // HEU randomly one in 5 times
+	  || (EveryRandomXTimestep(interval))) // HEU randomly one in 5 times
 	  {
 	    Material::Ptr offer = Offer_(req->target());
 	    port->AddBid(req, offer, this);

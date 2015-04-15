@@ -291,8 +291,8 @@ class EnrichmentFacility : public cyclus::Facility {
                              "enrichment facility"}
   double swu_capacity;
   #pragma cyclus var {"default": 1e299, "tooltip": "maximum inventory size", \
-                      "doc": "maximum inventory capacity of natural uranium " \
-                             "in the enrichment facility"}
+                      "doc": "maximum inventory capacity of natural uranium in " \
+                             "the enrichment facility"}
   double max_inv_size;
 
   #pragma cyclus var {"default": 0, "tooltip": "initial uranium reserves", \
@@ -305,13 +305,6 @@ class EnrichmentFacility : public cyclus::Facility {
                       "doc": "if set to 1 then enable social behavior "	\
                              "in trade decisions"}
   bool social_behav;
-  #pragma cyclus var {"default": 1, "tooltip": "use a fixed seed in the RNG",\
-                          "doc": "use a fixed seed value for the random " \
-                                 "number generator so that simulations " \
-                                 "are reproducible. If set to 0 then time " \
-                                 "is used as the RNG seed and simulations " \
-                                 "not repeatable." }
-  bool fixed_seed;
   //***
   #pragma cyclus var {'derived_init': 'current_swu_capacity = swu_capacity;'}
   double current_swu_capacity;

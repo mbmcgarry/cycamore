@@ -13,14 +13,9 @@ bool EveryXTimestep(int curr_time, int interval) {
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-bool EveryRandomXTimestep(int frequency, bool fixed_seed) {
+bool EveryRandomXTimestep(int frequency) {
   if (!seeded) {
-    if (fixed_seed) {
-      seed_val = 1 ;
-    } else {
-      seed_val = time(0) ;
-    }
-    srand(seed_val);  //use current time as seed for RNG
+    srand(time(0));  //use current time as seed for RNG
     seeded = true;
   }
   int midpoint = frequency / 2;  
@@ -41,7 +36,7 @@ bool EveryRandomXTimestep(int frequency, bool fixed_seed) {
 // Use Box-Muller algorithm to make a random number sampled from
 // a normal distribution
 
-double RNG_NormalDist(double mean, double sigma, bool fixed_seed) {
+double RNG_NormalDist(double mean, double sigma) {
 
   static double n2 = 0.0;
   static int n2_cached = 0;
@@ -50,15 +45,10 @@ double RNG_NormalDist(double mean, double sigma, bool fixed_seed) {
   double x, y, r;
 
   if (!seeded) {
-    if (fixed_seed) {
-      seed_val = 1 ;
-    } else {
-      seed_val = time(0) ;
-    }
-    srand(seed_val);  //use current time as seed for RNG
+    srand(time(0));
     seeded = true;
   }
-
+  
   do {
     x = 2.0*rand()/RAND_MAX - 1;
     y = 2.0*rand()/RAND_MAX - 1;

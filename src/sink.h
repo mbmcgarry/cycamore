@@ -143,7 +143,7 @@ class Sink : public cyclus::Facility  {
 
   /// determines the amount to request
   double RequestAmt() const {
-    double desired_amt = RNG_NormalDist(avg_qty, sigma, fixed_seed);
+    double desired_amt = RNG_NormalDist(avg_qty, sigma);
     return std::min(desired_amt, std::max(0.0, inventory.space()));
   }
 
@@ -175,16 +175,7 @@ class Sink : public cyclus::Facility  {
                              "EveryRandom.  If 0 then behavior is not " \
                              "implemented"}
  double behav_interval;
-
- #pragma cyclus var {"default": 1, "tooltip": "use a fixed seed in the RNG",\
-                          "doc": "use a fixed seed value for the random " \
-                                 "number generator so that simulations " \
-                                 "are reproducible. If set to 0 then time " \
-                                 "is used as the RNG seed and simulations " \
-                                 "not repeatable." }
-  bool fixed_seed;   //*** 
-
- #pragma cyclus var {"default": 0, "tooltip": "user-defined preference" , \
+ #pragma cyclus var {"default": 0, "tooltip": "user-defined preference" ,\
                       "doc": "change the default preference for requests "\
                              "from this agent"}
   int user_pref;
