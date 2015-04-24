@@ -15,7 +15,8 @@ bool EveryXTimestep(int curr_time, int interval) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 bool EveryRandomXTimestep(int frequency) {
   if (!seeded) {
-    srand(time(0));  //use current time as seed for RNG
+    //    srand(time(0));  //use current time as seed for RNG
+    srand(1);  //use fixed seed for reproducibility
     seeded = true;
   }
   int midpoint = frequency / 2;  
@@ -45,7 +46,8 @@ double RNG_NormalDist(double mean, double sigma) {
   double x, y, r;
 
   if (!seeded) {
-    srand(time(0));
+    //    srand(time(0));
+    srand(1);
     seeded = true;
   }
   
@@ -67,6 +69,8 @@ double RNG_NormalDist(double mean, double sigma) {
     n2_cached = 0 ;
     return n2*sigma + mean;
   }
+  
+//  return n1*sigma + mean;
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 /*
