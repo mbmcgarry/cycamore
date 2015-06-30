@@ -9,3 +9,6 @@ suffix.h
 rs.cred
 *.h5
 src/meg_old_tests/
+*.dat
+tests/run_inputs.py
+cyclus.sqlite

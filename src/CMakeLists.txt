@@ -2,11 +2,13 @@
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
-USE_CYCLUS("cycamore" "batch_reactor")
+USE_CYCLUS("cycamore" "reactor")
 
-USE_CYCLUS("cycamore" "enrichment_facility")
+USE_CYCLUS("cycamore" "fuel_fab")
 
-#USE_CYCLUS("cycamore" "inpro_reactor")
+USE_CYCLUS("cycamore" "enrichment")
+
+USE_CYCLUS("cycamore" "separations")
 
 USE_CYCLUS("cycamore" "sink")
 
