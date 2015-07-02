@@ -60,7 +60,8 @@ double RNG_NormalDist(double mean, double sigma) {
   double d = std::sqrt(-2.0*log(r)/r);
   double n1 = x*d;
   n2 = y*d;
-  
+
+  /*
   if (!n2_cached) {
     n2_cached = 1;
     return n1*sigma + mean;
@@ -69,8 +70,10 @@ double RNG_NormalDist(double mean, double sigma) {
     n2_cached = 0 ;
     return n2*sigma + mean;
   }
+  */
   
-//  return n1*sigma + mean;
+    return n1*sigma + mean;
+  //  return n2*sigma + mean;
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 /*
