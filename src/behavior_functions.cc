@@ -23,7 +23,9 @@ bool EveryRandomXTimestep(int frequency) {
  
   // The interwebs say that rand is not truly random.
   //  tRan = rand() % frequency;
-  int tRan = 1 + (rand()*(1.0/(RAND_MAX+1.0))) * frequency;
+  double cur_rand = rand();
+  std::cout << "EveryXRand! : " << cur_rand << std::endl;
+  int tRan = 1 + (cur_rand*(1.0/(RAND_MAX+1.0))) * frequency;
   //  int tRan = 1 + uniform_deviate_(rand()) * frequency;
 
   if (tRan == midpoint) {
@@ -39,6 +41,10 @@ bool EveryRandomXTimestep(int frequency) {
 
 double RNG_NormalDist(double mean, double sigma) {
 
+  if (sigma == 0 ) {
+    return mean ;
+  }
+
   static double n2 = 0.0;
   static int n2_cached = 0;
 
@@ -49,12 +55,15 @@ double RNG_NormalDist(double mean, double sigma) {
     //    srand(time(0));
     srand(1);
     seeded = true;
+    std::cout << "****SEEDING*****" << std::endl;
   }
   
   do {
     x = 2.0*rand()/RAND_MAX - 1;
     y = 2.0*rand()/RAND_MAX - 1;
     r = x*x + y*y;
+    std::cout << "x, y: " << x << "  " << y << std::endl;
+    std::cout << "r: " << r << std::endl;
   } while (r == 0.0 || r > 1.0);
   
   double d = std::sqrt(-2.0*log(r)/r);
@@ -71,7 +80,9 @@ double RNG_NormalDist(double mean, double sigma) {
     return n2*sigma + mean;
   }
   */
+  std::cout << "random number is: " << n1*sigma+mean << std::endl;
   return n1*sigma + mean;
+
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 /*
