@@ -14,6 +14,11 @@ bool EveryXTimestep(int curr_time, int interval) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 bool EveryRandomXTimestep(int frequency) {
+
+  if (frequency == 0) {
+    return false;
+  }
+
   if (!seeded) {
     //    srand(time(0));  //use current time as seed for RNG
     srand(1);  //use fixed seed for reproducibility

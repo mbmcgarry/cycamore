@@ -69,7 +69,8 @@ Sink::GetMatlRequests() {
   using cyclus::Composition;
 
   std::set<RequestPortfolio<Material>::Ptr> ports;
-
+  double amt = RequestAmt();
+  
   // Want opposite behavior of EF.  Return EMPTY port if
   // conditions are not met.
   if (social_behav == "Every" && behav_interval > 0) {
@@ -79,7 +80,8 @@ Sink::GetMatlRequests() {
 	return ports; 
       }
   }
-  else if (social_behav == "Random" && behav_interval > 0) {
+  // Call EveryRandom only if the agent REALLY want it (dummyproofing)
+  else if ((social_behav == "Random") && (amt > 0)){
     if (!EveryRandomXTimestep(behav_interval)) // HEU randomly one in X times
       {
 	return ports; 
@@ -88,7 +90,6 @@ Sink::GetMatlRequests() {
   
   // if NOT social behavior, then respond to all requests
   RequestPortfolio<Material>::Ptr port(new RequestPortfolio<Material>());
-  double amt = RequestAmt();
   Material::Ptr mat;
 
   if (recipe_name.empty()) {
