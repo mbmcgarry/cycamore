@@ -69,8 +69,9 @@ Sink::GetMatlRequests() {
   using cyclus::Composition;
 
   std::set<RequestPortfolio<Material>::Ptr> ports;
-  double amt = RequestAmt();
-  
+  //  double amt = RequestAmt();
+
+  /*
   // Want opposite behavior of EF.  Return EMPTY port if
   // conditions are not met.
   if (social_behav == "Every" && behav_interval > 0) {
@@ -87,8 +88,14 @@ Sink::GetMatlRequests() {
 	return ports; 
       }
   }
-  
-  // if NOT social behavior, then respond to all requests
+  */
+
+  // If social behavior, amt will be set to zero on non-trading timesteps
+  if (amt == 0) {
+    return ports;
+  }
+
+  // otherwise, respond to all requests
   RequestPortfolio<Material>::Ptr port(new RequestPortfolio<Material>());
   Material::Ptr mat;
 
@@ -123,7 +130,7 @@ Sink::GetGenRsrcRequests() {
   std::set<RequestPortfolio<Product>::Ptr> ports;
   RequestPortfolio<Product>::Ptr
       port(new RequestPortfolio<Product>());
-  double amt = RequestAmt();
+  //  double amt = RequestAmt();
 
   if (amt > cyclus::eps()) {
     CapacityConstraint<Product> cc(amt);
@@ -187,13 +194,32 @@ void Sink::Tick() {
   using std::vector;
   LOG(cyclus::LEV_INFO3, "SnkFac") << prototype() << " is ticking {";
 
-  double requestAmt = RequestAmt();
+  // set the amount to be requested on this timestep
+  // then determine whether trading will happen on this timestep. If not
+  // then change the requested material to zero.
+  amt = RequestAmt();
+
+  if (social_behav == "Every" && behav_interval > 0) {
+    int cur_time = context()->time();
+    if (!EveryXTimestep(cur_time, behav_interval)) // HEU every X time
+      {
+	amt = 0;
+      }
+  }
+  // Call EveryRandom only if the agent REALLY want it (dummyproofing)
+  else if ((social_behav == "Random") && (amt > 0)){
+    if (!EveryRandomXTimestep(behav_interval)) // HEU randomly one in X times
+      {
+	amt = 0;
+      }
+  }
+  
   // inform the simulation about what the sink facility will be requesting
-  if (requestAmt > cyclus::eps()) {
+  if (amt > cyclus::eps()) {
     for (vector<string>::iterator commod = in_commods.begin();
          commod != in_commods.end();
          commod++) {
-      LOG(cyclus::LEV_INFO4, "SnkFac") << " will request " << requestAmt
+      LOG(cyclus::LEV_INFO4, "SnkFac") << " will request " << amt
                                        << " kg of " << *commod << ".";
     }
   }

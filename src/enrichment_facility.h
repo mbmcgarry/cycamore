@@ -193,7 +193,10 @@ class EnrichmentFacility : public cyclus::Facility {
   ///  @return true if the above description is met by the material
   bool ValidReq(const cyclus::Material::Ptr mat);
 
- ///  @brief Determines if a particular request will be responded to
+  /// Determines whether EF is offering bids on a timestep
+  bool trade_timestep;
+
+  ///  @brief Determines if a particular request will be responded to
   ///  based on user specification such as maximum allowed enrichment
   ///  or other behavior parameters.
   virtual cyclus::BidPortfolio<cyclus::Material>::Ptr

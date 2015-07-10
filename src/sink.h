@@ -147,6 +147,10 @@ class Sink : public cyclus::Facility  {
     return std::min(desired_amt, std::max(0.0, inventory.space()));
   }
 
+  // Amount of material to be requested. Re-assessed at each timestep
+  // via the RequestAmt function.
+  double amt ;
+
   /// @return the input commodities
   inline const std::vector<std::string>&
       input_commodities() const { return in_commods; }

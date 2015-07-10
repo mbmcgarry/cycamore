@@ -68,6 +68,15 @@ void EnrichmentFacility::Build(cyclus::Agent* parent) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 void EnrichmentFacility::Tick() {
+
+  int cur_time = context()->time();
+  int interval = 5 ;      //  only trade on every 5th timestep
+
+  trade_timestep = 1 ;
+  if (social_behav) {
+    trade_timestep = (EveryRandomXTimestep(interval));
+  }
+
   LOG(cyclus::LEV_INFO3, "EnrFac") << prototype() << " is ticking {";
   LOG(cyclus::LEV_INFO3, "EnrFac") << "}";
   current_swu_capacity = SwuCapacity();
@@ -362,14 +371,13 @@ EnrichmentFacility::ConsiderMatlRequests(
       int cur_time = context()->time();
       int interval = 2 ;      //  only trade on every 5th timestep
 
+      // if social behavior on and EveryX/Random says no trade
+      if (!trade_timestep) {
+	return port ;
+      }
       if (ValidReq(req->target()) && request_enrich <= enrich_limit) {  // This check is always done
-	if ((!social_behav)   //always trade if social_behave = false
-	     //   || (EveryXTimestep(cur_time, interval))) // HEU every 5th time
-	    || (EveryRandomXTimestep(interval))) // HEU randomly one in 5 times
-	  {
-	    Material::Ptr offer = Offer_(req->target());
-	    port->AddBid(req, offer, this);
-	  }
+	Material::Ptr offer = Offer_(req->target());
+	port->AddBid(req, offer, this);
       }
     }
   } //for each out commod
