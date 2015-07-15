@@ -14,8 +14,9 @@ Sink::Sink(cyclus::Context* ctx)
     : cyclus::Facility(ctx),
       social_behav(""), //***
       behav_interval(0), //***
-      user_pref(0), //***
+       user_pref(0), //***
       sigma(0), //***
+      t_trade(0), //***
       max_inv_size(1e299) {}  // actually only used in header file
 
 
@@ -197,10 +198,13 @@ void Sink::Tick() {
   // set the amount to be requested on this timestep
   // then determine whether trading will happen on this timestep. If not
   // then change the requested material to zero.
+  int cur_time = context()->time();
+  
   amt = RequestAmt();
-
+  if (cur_time < t_trade) {
+    amt = 0;
+  }
   if (social_behav == "Every" && behav_interval > 0) {
-    int cur_time = context()->time();
     if (!EveryXTimestep(cur_time, behav_interval)) // HEU every X time
       {
 	amt = 0;

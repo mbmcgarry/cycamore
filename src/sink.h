@@ -196,7 +196,17 @@ class Sink : public cyclus::Facility  {
                           "doc": "standard deviation (FWHM) of the normal " \
                                  "distribution used to generate requested " \
                                  "amount of material (avg_qty)" }
-  double sigma;   //*** 
+  double sigma; 
+
+  #pragma cyclus var {"default": 0,					\
+                      "tooltip": "time to being allowing trades",\
+                          "doc": "At all timesteps before this value, the "   \
+                                 "facility does make material requests. At " \
+                                 "times at or beyond this value, requests are "\
+                                 "made subject to the other behavioral " \
+                                 "features available in this archetype"  }
+  double t_trade;   //*** 
+
   /// max inventory size
   #pragma cyclus var {"default": 1e299, \
                       "tooltip": "sink maximum inventory size", \
