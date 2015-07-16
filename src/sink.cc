@@ -14,7 +14,8 @@ Sink::Sink(cyclus::Context* ctx)
     : cyclus::Facility(ctx),
       social_behav(""), //***
       behav_interval(0), //***
-       user_pref(0), //***
+      time_seed(0), //****
+      user_pref(0), //***
       sigma(0), //***
       t_trade(0), //***
       max_inv_size(1e299) {}  // actually only used in header file
@@ -212,7 +213,7 @@ void Sink::Tick() {
   }
   // Call EveryRandom only if the agent REALLY want it (dummyproofing)
   else if ((social_behav == "Random") && (amt > 0)){
-    if (!EveryRandomXTimestep(behav_interval)) // HEU randomly one in X times
+    if (!EveryRandomXTimestep(behav_interval, time_seed)) // HEU randomly one in X times
       {
 	amt = 0;
       }

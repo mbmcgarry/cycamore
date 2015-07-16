@@ -143,7 +143,7 @@ class Sink : public cyclus::Facility  {
 
   /// determines the amount to request
   double RequestAmt() const {
-    double desired_amt = RNG_NormalDist(avg_qty, sigma);
+    double desired_amt = RNG_NormalDist(avg_qty, sigma, time_seed);
     return std::min(desired_amt, std::max(0.0, inventory.space()));
   }
 
@@ -174,17 +174,22 @@ class Sink : public cyclus::Facility  {
                                  "where behav_interval describes the " \
                                  "time interval for behavior action"}
   std::string social_behav;
-  #pragma cyclus var {"default": 0, "tooltip": "interval for behavior" , \
+
+  #pragma cyclus var {"default": 0, "tooltip": "interval for behavior" ,\
                       "doc": "interval of social behavior: Every or "\
                              "EveryRandom.  If 0 then behavior is not " \
                              "implemented"}
- double behav_interval;
- #pragma cyclus var {"default": 0, "tooltip": "user-defined preference" ,\
+  double behav_interval;
+
+  #pragma cyclus var {"default": 0, "tooltip": "user-defined preference" , \
                       "doc": "change the default preference for requests "\
                              "from this agent"}
   int user_pref;
-  //***
-  /// monthly acceptance avg_qty
+
+#pragma cyclus var {"default": 0, "tooltip": "defines RNG seed as constant ",\
+                      "doc": "if set to zero or seeded on Time if set to 1."}
+  bool time_seed;
+
   #pragma cyclus var {"default": 1e299, "tooltip": "sink avg_qty",	\
                           "doc": "mean for the normal distribution that " \
                                  "is sampled to determine the amount of " \
@@ -192,7 +197,7 @@ class Sink : public cyclus::Facility  {
                                  "time step"}
   double avg_qty;
 
-   #pragma cyclus var {"default": 0, "tooltip": "standard deviation",	\
+  #pragma cyclus var {"default": 0, "tooltip": "standard deviation",	\
                           "doc": "standard deviation (FWHM) of the normal " \
                                  "distribution used to generate requested " \
                                  "amount of material (avg_qty)" }

@@ -71,10 +71,11 @@ void EnrichmentFacility::Tick() {
 
   int cur_time = context()->time();
   int interval = 5 ;      //  only trade on every 5th timestep
-
+  bool time_seed = 0;     // fix timeseed to 1
+  
   trade_timestep = 1 ;
   if (social_behav) {
-    trade_timestep = (EveryRandomXTimestep(interval));
+    trade_timestep = (EveryRandomXTimestep(interval, time_seed));
   }
 
   LOG(cyclus::LEV_INFO3, "EnrFac") << prototype() << " is ticking {";
