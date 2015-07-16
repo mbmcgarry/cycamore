@@ -8,4 +8,5 @@ suffix.h
 *.pyc
 rs.cred
 *.h5
+cyclus.sqlite
 src/meg_old_tests/
