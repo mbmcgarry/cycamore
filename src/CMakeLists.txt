@@ -1,10 +1,6 @@
 # ------------------- Add all Concrete Agents ----------------------------
 
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
-
-CONFIGURE_FILE(behavior_functions.h "${CMAKE_CURRENT_SOURCE_DIR}/behavior_functions.h" @ONLY)
-
-SET(CUSTOM_HEADERS "behavior_functions.h")
+USE_CYCLUS("cycamore" "behavior_functions")
 
 USE_CYCLUS("cycamore" "batch_reactor")
 

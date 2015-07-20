@@ -90,22 +90,6 @@ MACRO(USE_CYCLUS lib_root src_root)
         SET(PREPROCESSOR "--cpp-path=cpp")
     ENDIF()
 
-
-    # copy custom headers
-    FOREACH(fname ${CUSTOM_HEADERS})
-        SET(src "${CMAKE_CURRENT_SOURCE_DIR}/${fname}")
-        SET(dst "${BUILD_DIR}/${fname}")
-        MESSAGE(STATUS "Copying ${src} to ${dst}.")
-        EXECUTE_PROCESS(COMMAND "cp" "${src}" "${dst}")
-        ADD_CUSTOM_COMMAND(
-            OUTPUT "${dst}"
-            COMMAND "cp" "${src}" "${dst}"
-            DEPENDS "${src}"
-            COMMENT "Copying ${src} to ${dst}."
-            )
-    ENDFOREACH()
-    MESSAGE("dstcustomheaders: ${CUSTOM_HEADERS}")
-
     # process header
     SET(ORIG "--pass3-use-orig")
     SET(HIN "${CMAKE_CURRENT_SOURCE_DIR}/${src_root}.h")
@@ -123,9 +107,9 @@ MACRO(USE_CYCLUS lib_root src_root)
     SET(
         "${lib_root}_CC"
         "${${lib_root}_CC}" "${CCOUT}"
-        CACHE INTERNAL "Agent impl" FORCE
+	CACHE INTERNAL "Agent impl" FORCE
         )
-    IF(EXISTS "${HIN}")
+	IF(EXISTS "${HIN}")
         # not sure if we still need this...
         IF(NOT EXISTS ${HOUT})
             MESSAGE(STATUS "Executing ${CYCPP} ${HIN} ${PREPROCESSOR} ${HFLAG} ${ORIG} ${INCL_ARGS}")
@@ -139,7 +123,6 @@ MACRO(USE_CYCLUS lib_root src_root)
             DEPENDS ${HIN}
             DEPENDS ${CCIN}
             DEPENDS ${CYCPP}
-	    DEPENDS ${CUSTOM_HEADERS}
 	    COMMENT "Executing ${CYCPP} ${HIN} ${PREPROCESSOR} ${HFLAG} ${ORIG} ${INCL_ARGS}"
             COMMENT "Executing ${CYCPP} ${CCIN} ${PREPROCESSOR} ${CCFLAG} ${ORIG} ${INCL_ARGS}"
             )
@@ -154,7 +137,6 @@ MACRO(USE_CYCLUS lib_root src_root)
             COMMAND ${CYCPP} ${CCIN} ${PREPROCESSOR} ${CCFLAG} ${ORIG} ${INCL_ARGS}
             DEPENDS ${CCIN}
             DEPENDS ${CYCPP}
- 	    DEPENDS ${CUSTOM_HEADERS}
             COMMENT "Executing ${CYCPP} ${CCIN} ${PREPROCESSOR} ${CCFLAG} ${ORIG} ${INCL_ARGS}"
             )
     ENDIF(EXISTS "${HIN}")
@@ -179,7 +161,6 @@ MACRO(USE_CYCLUS lib_root src_root)
                 DEPENDS ${CCIN}
                 DEPENDS ${HTIN}
                 DEPENDS ${CCTIN}
-		DEPENDS ${CUSTOM_HEADERS}
                 COMMENT "Copying ${HTIN} to ${HTOUT}."
                 COMMENT "Copying ${CCTIN} to ${CCTOUT}."
                 )
@@ -195,7 +176,6 @@ MACRO(USE_CYCLUS lib_root src_root)
             COMMAND ${CMD} ${CCTIN} ${CCTOUT}
             DEPENDS ${CCTIN}
             DEPENDS ${CCIN}
-	    DEPENDS ${CUSTOM_HEADERS}
             COMMENT "Copying ${CCTIN} to ${CCTOUT}."
             )
         SET("${lib_root}_TEST_CC" "${${lib_root}_TEST_CC}" "${CCOUT}" "${CCTOUT}"
@@ -239,7 +219,9 @@ MACRO(INSTALL_CYCLUS_MODULE lib_root lib_dir)
         SET(DRIVER "${CYCLUS_DEFAULT_TEST_DRIVER}")
     ENDIF(${ARGC} GREATER 2)
 
-    INSTALL_AGENT_LIB_("${LIB_NAME}" "${LIB_SRC}" "${LIB_H}" "${INST_DIR}")
+    MESSAGE(STATUS "What is happening!! Libname: ${LIB_NAME} lib_src: ${LIB_SRC} lib_h: ${LIB_H} inst_dir:${INST_DIR}")
+   INSTALL_AGENT_LIB_("${LIB_NAME}" "${LIB_SRC}" "${LIB_H}" "${INST_DIR}")
+ 
     INSTALL_AGENT_TESTS_("${LIB_NAME}" "${TEST_SRC}" "${TEST_H}" "${DRIVER}" "${INST_DIR}")
 ENDMACRO()
 
