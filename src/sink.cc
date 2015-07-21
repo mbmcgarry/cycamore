@@ -201,7 +201,10 @@ void Sink::Tick() {
   // then change the requested material to zero.
   int cur_time = context()->time();
   
-  amt = RequestAmt();
+  /// determine the amount to request
+  double desired_amt = RNG_NormalDist(avg_qty, sigma, time_seed);
+  amt = std::min(desired_amt, std::max(0.0, inventory.space()));
+
   if (cur_time < t_trade) {
     amt = 0;
   }
@@ -244,6 +247,7 @@ void Sink::Tock() {
                                    << context()->time() << ".";
   LOG(cyclus::LEV_INFO3, "SnkFac") << "}";
 }
+
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 extern "C" cyclus::Agent* ConstructSink(cyclus::Context* ctx) {
