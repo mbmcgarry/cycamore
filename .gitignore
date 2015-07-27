@@ -10,3 +10,5 @@ rs.cred
 *.h5
 cyclus.sqlite
 src/meg_old_tests/
+*.dat
+tests/run_inputs.py

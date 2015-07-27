@@ -71,26 +71,6 @@ Sink::GetMatlRequests() {
   using cyclus::Composition;
 
   std::set<RequestPortfolio<Material>::Ptr> ports;
-  //  double amt = RequestAmt();
-
-  /*
-  // Want opposite behavior of EF.  Return EMPTY port if
-  // conditions are not met.
-  if (social_behav == "Every" && behav_interval > 0) {
-    int cur_time = context()->time();
-    if (!EveryXTimestep(cur_time, behav_interval)) // HEU every X time
-      {
-	return ports; 
-      }
-  }
-  // Call EveryRandom only if the agent REALLY want it (dummyproofing)
-  else if ((social_behav == "Random") && (amt > 0)){
-    if (!EveryRandomXTimestep(behav_interval)) // HEU randomly one in X times
-      {
-	return ports; 
-      }
-  }
-  */
 
   // If social behavior, amt will be set to zero on non-trading timesteps
   if (amt == 0) {
@@ -99,6 +79,7 @@ Sink::GetMatlRequests() {
 
   // otherwise, respond to all requests
   RequestPortfolio<Material>::Ptr port(new RequestPortfolio<Material>());
+
   Material::Ptr mat;
 
   if (recipe_name.empty()) {
@@ -132,7 +113,6 @@ Sink::GetGenRsrcRequests() {
   std::set<RequestPortfolio<Product>::Ptr> ports;
   RequestPortfolio<Product>::Ptr
       port(new RequestPortfolio<Product>());
-  //  double amt = RequestAmt();
 
   if (amt > cyclus::eps()) {
     CapacityConstraint<Product> cc(amt);
