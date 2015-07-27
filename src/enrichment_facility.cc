@@ -18,7 +18,10 @@ EnrichmentFacility::EnrichmentFacility(cyclus::Context* ctx)
       tails_assay(0),
       feed_assay(0),
       swu_capacity(0),
-      social_behav(0), //***
+      social_behav("None"), //***
+      behav_interval(0), //***
+      rng_seed(0),   //***
+      enrich_limit(1), //***
       initial_reserves(0),
       in_commod(""),
       in_recipe(""),
@@ -70,12 +73,16 @@ void EnrichmentFacility::Build(cyclus::Agent* parent) {
 void EnrichmentFacility::Tick() {
 
   int cur_time = context()->time();
-  int interval = 5 ;      //  only trade on every 5th timestep
-  bool time_seed = 0;     // fix timeseed to 1
   
-  trade_timestep = 1 ;
-  if (social_behav) {
-    trade_timestep = (EveryRandomXTimestep(interval, time_seed));
+  trade_timestep = 0 ;
+  if (social_behav == "Every" && behav_interval > 0) {
+    trade_timestep = (EveryXTimestep(cur_time, behav_interval));
+  }
+  else if (social_behav == "Random" && behav_interval > 0) {
+    trade_timestep = (EveryRandomXTimestep(behav_interval, rng_seed));
+  }
+  else if (social_behav == "None") {
+    trade_timestep = 1;
   }
 
   LOG(cyclus::LEV_INFO3, "EnrFac") << prototype() << " is ticking {";
@@ -134,19 +141,7 @@ EnrichmentFacility::GetMatlBids(
   using cyclus::Request;
 
   std::set<BidPortfolio<Material>::Ptr> all_ports;
-/*
-  // returns empty portfolio for all bids at certain timesteps
-  if (social_behav) {
-    int cur_time = context()->time();
-    //  only trade on every 5th timestep
-    int interval = 5 ;
-    if (EveryXTimestep(cur_time, interval)) {
-      return ports;
-    //    if (cur_time % 5 != 0) {
-    //      return all_ports; 
-    }
-  }    
-*/
+
   if (inventory.quantity() <= 0) {
     return all_ports;
   }
@@ -362,21 +357,13 @@ EnrichmentFacility::ConsiderMatlRequests(
     for (it = requests.begin(); it != requests.end(); ++it) {
       Request<Material>* req = *it;
       Material::Ptr mat = req->target();
-      double enrich_limit ;
-      if (social_behav) {
-	enrich_limit = 0.1 ;  // do not trade to facilities that want HEU
-      } else {
-	enrich_limit = 1.0 ;
-      }
       double request_enrich = cyclus::toolkit::UraniumAssay(mat) ;
       int cur_time = context()->time();
-      int interval = 2 ;      //  only trade on every 5th timestep
-
-      // if social behavior on and EveryX/Random says no trade
+      // if social behavior on and logic says no trade
       if (!trade_timestep) {
 	return port ;
       }
-      if (ValidReq(req->target()) && request_enrich <= enrich_limit) {  // This check is always done
+      if (ValidReq(req->target()) && request_enrich <= enrich_limit) {
 	Material::Ptr offer = Offer_(req->target());
 	port->AddBid(req, offer, this);
       }

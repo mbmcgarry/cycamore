@@ -304,11 +304,31 @@ class EnrichmentFacility : public cyclus::Facility {
                              "simulation"}
   double initial_reserves;
   //***
-  #pragma cyclus var {"default": 0, "tooltip": "social behavior" ,	\
-                      "doc": "if set to 1 then enable social behavior "	\
-                             "in trade decisions"}
-  bool social_behav;
+  #pragma cyclus var {"default": "None", "tooltip": "social behavior" ,	\
+                          "doc": "type of social behavior used in trade " \
+                                 "decisions: None, Every, Random " \
+                                 "where behav_interval describes the " \
+                                 "time interval for behavior action"}
+  std::string social_behav;
+
+  #pragma cyclus var {"default": 0, "tooltip": "interval for behavior" ,\
+                      "doc": "interval of social behavior: Every or "\
+                             "EveryRandom.  If 0 then behavior is not " \
+                             "implemented"}
+  double behav_interval;
+
+  #pragma cyclus var {"default": 0, "tooltip": "Seed for RNG" ,		\
+                          "doc": "seed on current system time if set to -1," \
+                                 " otherwise seed on number defined"}
+  bool rng_seed;
   //***
+  #pragma cyclus var {"default": 1, "tooltip": "maximum allowed enrichment" ,\
+                      "doc": "Maximum allowed enrichment. Requests for higher" \
+                             " enrichment will not be fulfilled.  Default 1" \
+                             " allows bidding up to 100% enriched."}
+
+  double enrich_limit;
+
   #pragma cyclus var {'derived_init': 'current_swu_capacity = swu_capacity;'}
   double current_swu_capacity;
   #pragma cyclus var {\

@@ -13,18 +13,18 @@ bool EveryXTimestep(int curr_time, int interval) {
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-bool EveryRandomXTimestep(int frequency, bool time_seed) {
+bool EveryRandomXTimestep(int frequency, int rng_seed) {
 
   if (frequency == 0) {
     return false;
   }
 
   if (!seeded) {
-    if (time_seed) {
-      srand(time(0)); // if seeding on time
+    if (rng_seed == -1) {
+      srand(time(0));    // seed random
     }
     else {
-      srand(1);  //use fixed seed for reproducibility
+      srand(rng_seed);   // user-defined fixed seed
     }
     seeded = true;
   }
@@ -35,6 +35,7 @@ bool EveryRandomXTimestep(int frequency, bool time_seed) {
   double cur_rand = rand();
   int tRan = 1 + (cur_rand*(1.0/(RAND_MAX+1.0))) * frequency;
   //  int tRan = 1 + uniform_deviate_(rand()) * frequency;
+    std::cout << "EveryRandom: " << cur_rand/RAND_MAX << std::endl;
 
   if (tRan == midpoint) {
     return true;
@@ -55,7 +56,7 @@ bool EveryRandomXTimestep(int frequency) {
 // Use Box-Muller algorithm to make a random number sampled from
 // a normal distribution
 
-double RNG_NormalDist(double mean, double sigma, bool time_seed) {
+double RNG_NormalDist(double mean, double sigma, int rng_seed) {
 
   if (sigma == 0 ) {
     return mean ;
@@ -66,21 +67,25 @@ double RNG_NormalDist(double mean, double sigma, bool time_seed) {
 
   double result ;
   double x, y, r;
+  double rand1, rand2;
 
   if (!seeded) {
-    if (time_seed) {
+    if (rng_seed == -1) {
       srand(time(0)); // if seeding on time
     }
     else {
-      srand(1);  //use fixed seed for reproducibility
+      srand(rng_seed);  //use fixed seed for reproducibility
     }
     seeded = true;
   }
   
   do {
-    x = 2.0*rand()/RAND_MAX - 1;
-    y = 2.0*rand()/RAND_MAX - 1;
+    rand1 = rand();
+    rand2 = rand();
+    x = 2.0*rand1/RAND_MAX - 1;
+    y = 2.0*rand2/RAND_MAX - 1;
     r = x*x + y*y;
+    std::cout << rand1/RAND_MAX << "  " << rand2/RAND_MAX  << std::endl;
   } while (r == 0.0 || r > 1.0);
   
   double d = std::sqrt(-2.0*log(r)/r);
@@ -97,7 +102,7 @@ double RNG_NormalDist(double mean, double sigma, bool time_seed) {
     return n2*sigma + mean;
   }
   */
-    std::cout << "random number is " << n1*sigma + mean << std::endl;
+  std::cout << "NormalDist: " << n1*sigma + mean  << std::endl;
   return n1*sigma + mean;
 
 }

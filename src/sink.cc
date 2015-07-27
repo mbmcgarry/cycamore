@@ -14,7 +14,7 @@ Sink::Sink(cyclus::Context* ctx)
     : cyclus::Facility(ctx),
       social_behav(""), //***
       behav_interval(0), //***
-      time_seed(0), //****
+      rng_seed(0), //****
       user_pref(0), //***
       sigma(0), //***
       t_trade(0), //***
@@ -202,22 +202,25 @@ void Sink::Tick() {
   int cur_time = context()->time();
   
   /// determine the amount to request
-  double desired_amt = RNG_NormalDist(avg_qty, sigma, time_seed);
+  double desired_amt = RNG_NormalDist(avg_qty, sigma, rng_seed);
   amt = std::min(desired_amt, std::max(0.0, inventory.space()));
 
   if (cur_time < t_trade) {
+    std::cout << "Amt is zero because curr time " << cur_time << " <t_trade" << t_trade << std::endl;
     amt = 0;
   }
   if (social_behav == "Every" && behav_interval > 0) {
     if (!EveryXTimestep(cur_time, behav_interval)) // HEU every X time
       {
+    std::cout << "Amt is zero because EVERY and interval > 0 " << std::endl;
 	amt = 0;
       }
   }
   // Call EveryRandom only if the agent REALLY want it (dummyproofing)
   else if ((social_behav == "Random") && (amt > 0)){
-    if (!EveryRandomXTimestep(behav_interval, time_seed)) // HEU randomly one in X times
+    if (!EveryRandomXTimestep(behav_interval, rng_seed)) // HEU randomly one in X times
       {
+	std::cout << "Amt is zero because Random is negatvive " << std::endl;
 	amt = 0;
       }
   }
@@ -246,6 +249,9 @@ void Sink::Tock() {
                                    << " units of material at the close of month "
                                    << context()->time() << ".";
   LOG(cyclus::LEV_INFO3, "SnkFac") << "}";
+
+  std::cout << "sink is holding" << inventory.quantity() << " at "
+	    << context()->time() << std::endl;
 }
 
 

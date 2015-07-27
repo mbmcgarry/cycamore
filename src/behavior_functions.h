@@ -9,13 +9,13 @@ bool EveryXTimestep(int curr_time, int interval);
 // out of 100 when frequency = 5 )
 //bool EveryRandomXTimestep(int frequency);
 
-bool EveryRandomXTimestep(int frequency, bool time_seed);
+bool EveryRandomXTimestep(int frequency, int rng_seed);
 
 // returns a randomly generated number from a
 // normal distribution defined by mean and
 // sigma (full-width-half-max)
 //double RNG_NormalDist(double mean, double sigma);
 
-double RNG_NormalDist(double mean, double sigma, bool time_seed);
+double RNG_NormalDist(double mean, double sigma, int rng_seed);
 
 #endif  //  CYCAMORE_SRC_BEHAVIOR_FUNCTIONS_H_

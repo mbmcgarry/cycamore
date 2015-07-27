@@ -180,9 +180,10 @@ class Sink : public cyclus::Facility  {
                              "from this agent"}
   int user_pref;
 
-#pragma cyclus var {"default": 0, "tooltip": "defines RNG seed as constant ",\
-                      "doc": "if set to zero or seeded on Time if set to 1."}
-  bool time_seed;
+#pragma cyclus var {"default": 0, "tooltip": "defines RNG seed",\
+                        "doc": "seed on current system time if set to -1," \
+                               " otherwise seed on number defined"}
+  int rng_seed;
 
   #pragma cyclus var {"default": 1e299, "tooltip": "sink avg_qty",	\
                           "doc": "mean for the normal distribution that " \
