@@ -182,6 +182,7 @@ void Sink::Tick() {
   int cur_time = context()->time();
   
   /// determine the amount to request
+  // If sigma=0 then RNG is not queried
   double desired_amt = RNG_NormalDist(avg_qty, sigma, rng_seed);
   amt = std::min(desired_amt, std::max(0.0, inventory.space()));
 
@@ -203,6 +204,12 @@ void Sink::Tick() {
 	std::cout << "Amt is zero because Random is negatvive " << std::endl;
 	amt = 0;
       }
+  }
+  // If reference, query RNG but force trade as zero quantity.
+  else if (social_behav == "Reference"){
+    bool res = EveryRandomXTimestep(behav_interval, rng_seed);
+    std::cout << "Amt is zero because Reference superficially queries RNG " << std::endl;
+    amt = 0;
   }
   
   // inform the simulation about what the sink facility will be requesting

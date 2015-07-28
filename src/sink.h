@@ -102,9 +102,11 @@ class Sink : public cyclus::Facility  {
   //***
   #pragma cyclus var {"default": "None", "tooltip": "social behavior",	\
                           "doc": "type of social behavior used in trade " \
-                                 "decisions: None, Every, Random " \
+                                 "decisions: None, Every, Random, Reference " \
                                  "where behav_interval describes the " \
-                                 "time interval for behavior action"}
+                                 "time interval for behavior action." \
+                                 "Reference queries the RNG to mimic Random, "\
+                                 "but returns zero material qty to trade."}
   std::string social_behav;
 
   #pragma cyclus var {"default": 0, "tooltip": "interval for behavior" ,\
