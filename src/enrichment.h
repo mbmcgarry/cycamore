@@ -161,6 +161,13 @@ class Enrichment : public cyclus::Facility {
   virtual std::string str();
   // ---
 
+  bool seeded;
+  // returns true every X interval (ie every 5th timestep)
+  bool EveryXTimestep(int curr_time, int interval);
+
+  // randomly returns true with a frequency X
+  bool EveryRandomXTimestep(int frequency, int rng_seed);
+  
   // --- Facility Members ---
   /// perform module-specific tasks when entering the simulation
   virtual void Build(cyclus::Agent* parent);

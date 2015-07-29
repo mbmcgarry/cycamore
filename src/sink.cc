@@ -5,7 +5,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "sink.h"
-#include "behavior_functions.h"
+
 
 namespace cycamore {
 
@@ -239,6 +239,98 @@ void Sink::Tock() {
 
   std::cout << "sink is holding" << inventory.quantity() << " at "
 	    << context()->time() << std::endl;
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+bool Sink::EveryXTimestep(int curr_time, int interval) {
+  // true when there is no remainder, so it is the Xth timestep
+  return curr_time % interval == 0;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+bool Sink::EveryRandomXTimestep(int frequency, int rng_seed) {
+
+  if (frequency == 0) {
+    return false;
+  }
+
+  if (!seeded) {
+    if (rng_seed == -1) {
+      srand(time(0));    // seed random
+    }
+    else {
+      srand(rng_seed);   // user-defined fixed seed
+    }
+    seeded = true;
+  }
+  int midpoint = frequency / 2;  
+ 
+  // The interwebs say that rand is not truly random.
+  //  tRan = rand() % frequency;
+  double cur_rand = rand();
+  int tRan = 1 + (cur_rand*(1.0/(RAND_MAX+1.0))) * frequency;
+  //  int tRan = 1 + uniform_deviate_(rand()) * frequency;
+    std::cout << "EveryRandom: " << cur_rand/RAND_MAX << std::endl;
+
+  if (tRan == midpoint) {
+    return true;
+  } else {
+   return false;
+  }
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Use Box-Muller algorithm to make a random number sampled from
+// a normal distribution
+
+double Sink::RNG_NormalDist(double mean, double sigma, int rng_seed) {
+
+  if (sigma == 0 ) {
+    return mean ;
+  }
+
+  static double n2 = 0.0;
+  static int n2_cached = 0;
+
+  double result ;
+  double x, y, r;
+  double rand1, rand2;
+
+  if (!seeded) {
+    if (rng_seed == -1) {
+      srand(time(0)); // if seeding on time
+    }
+    else {
+      srand(rng_seed);  //use fixed seed for reproducibility
+    }
+    seeded = true;
+  }
+  
+  do {
+    rand1 = rand();
+    rand2 = rand();
+    x = 2.0*rand1/RAND_MAX - 1;
+    y = 2.0*rand2/RAND_MAX - 1;
+    r = x*x + y*y;
+    std::cout << rand1/RAND_MAX << "  " << rand2/RAND_MAX  << std::endl;
+  } while (r == 0.0 || r > 1.0);
+  
+  double d = std::sqrt(-2.0*log(r)/r);
+  double n1 = x*d;
+  n2 = y*d;
+  
+  /*
+  if (!n2_cached) {
+    n2_cached = 1;
+    return n1*sigma + mean;
+  }
+  else {
+    n2_cached = 0 ;
+    return n2*sigma + mean;
+  }
+  */
+  std::cout << "NormalDist: " << n1*sigma + mean  << std::endl;
+  return n1*sigma + mean;
+
 }
 
 

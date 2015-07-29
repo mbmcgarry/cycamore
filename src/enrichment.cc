@@ -1,6 +1,5 @@
 // Implements the Enrichment class
 #include "enrichment.h"
-#include "behavior_functions.h"
 
 #include <algorithm>
 #include <cmath>
@@ -519,6 +518,44 @@ double Enrichment::FeedAssay() {
   cyclus::Material::Ptr fission_matl = inventory.Pop(inventory.quantity());
   inventory.Push(fission_matl);
   return cyclus::toolkit::UraniumAssay(fission_matl); 
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+bool Enrichment::EveryXTimestep(int curr_time, int interval) {
+  // true when there is no remainder, so it is the Xth timestep
+  return curr_time % interval == 0;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+bool Enrichment::EveryRandomXTimestep(int frequency, int rng_seed) {
+
+  if (frequency == 0) {
+    return false;
+  }
+
+  if (!seeded) {
+    if (rng_seed == -1) {
+      srand(time(0));    // seed random
+    }
+    else {
+      srand(rng_seed);   // user-defined fixed seed
+    }
+    seeded = true;
+  }
+  int midpoint = frequency / 2;  
+ 
+  // The interwebs say that rand is not truly random.
+  //  tRan = rand() % frequency;
+  double cur_rand = rand();
+  int tRan = 1 + (cur_rand*(1.0/(RAND_MAX+1.0))) * frequency;
+  //  int tRan = 1 + uniform_deviate_(rand()) * frequency;
+    std::cout << "EveryRandom: " << cur_rand/RAND_MAX << std::endl;
+
+  if (tRan == midpoint) {
+    return true;
+  } else {
+   return false;
+  }
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
