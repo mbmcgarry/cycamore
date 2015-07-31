@@ -13,7 +13,10 @@ namespace cycamore {
 /// an untracked material that should only be used for its composition and qty
 /// - not in any real inventories, etc.
 cyclus::Material::Ptr SepMaterial(std::map<int, double> effs,
-                                  cyclus::Material::Ptr mat);
+                                  cyclus::Material::Ptr mat,
+				  double ideal_eff);
+
+std::vector<double> AdjustEfficiencies();
 
 /// Separations processes feed material into one or more streams containing
 /// specific elements and/or nuclides.  It uses mass-based efficiencies.
@@ -95,6 +98,7 @@ class Separations : public cyclus::Facility {
   virtual cyclus::Inventories SnapshotInv();
   virtual void InitInv(cyclus::Inventories& inv);
 
+  
  private:
   #pragma cyclus var { \
     "doc": "Ordered list of commodities on which to request feed material to " \
@@ -188,7 +192,45 @@ class Separations : public cyclus::Facility {
            " (e.g. sum of U efficiencies for all streams must be <= 1).", \
   }
   std::map<std::string, std::pair<double, std::map<int, double> > > streams_;
+  #pragma cyclus var { \
+    "alias": ["streams", ["info", ["avg_efficiency", "sigma", "frequency"]]], \
+    "uitype": ["oneormore", "outcommodity", ["map", "string", ["double"]]], \
+    "uilabel": "Variation in efficiency for each stream", \
+    "doc": "Variation in efficiency for each stream" \
+           " Stream names MUST match those defined in Streams_ and include " \
+           " Fuel, Diverted, Losses (additional streams not variable)" \
+           " Each stream can have a variable amplitude and variable time "  \
+           " implementation for its efficiency (assumes all components of " \
+           " a given stream have the same efficiency)" \
+    " The efficiency listed in Streams_ is a placeholder and will be "	\
+	   " adjusted at each timestep based on behavior defined here. " \
+	   " Average efficiency is the amplitude around which oscillations " \
+	   " occur. Sigma is the width of the distribution function. " \
+	   " Frequency is the time-base for irregular changes in amplitude " \
+	   " To apply Normal Distribution: [mean, sigma, 1] " \
+	   "             Every X Timestep: [mean, 0, freq] " \
+	   "        Every Random Timestep: [mean, -1, freq]" \
+           " Total efficiency of all strings <= 1.  Covert efficiency is " \
+	   " defined here. Loss is fixed [mean, 0, 1].  " \
+	   " Natural variation in Fuel is defined, then adjusted to be" \
+           " F <= 1-D-L. If F+D+L < 1 then remainder of stream goes to Waste", \
+  }
+  std::map<std::string, std::vector<double> > eff_variation;
 
+  #pragma cyclus var {"default": 0, "tooltip": "defines RNG seed",\
+                        "doc": "seed on current system time if set to -1," \
+                               " otherwise seed on number defined"}
+  int rng_seed;
+
+  #pragma cyclus var {"default": 0,					\
+                      "tooltip": "time to being allowing trades",\
+                          "doc": "At all timesteps before this value, the "   \
+                                 "facility does make material requests. At " \
+                                 "times at or beyond this value, requests are "\
+                                 "made subject to the other behavioral " \
+                                 "features available in this archetype"  }
+  double t_trade;   //*** 
+  
   // custom SnapshotInv and InitInv and EnterNotify are used to persist this
   // state var.
   std::map<std::string, cyclus::toolkit::ResBuf<cyclus::Material> > streambufs;

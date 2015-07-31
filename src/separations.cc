@@ -1,4 +1,5 @@
 #include "separations.h"
+#include "behavior_functions.h"
 
 using cyclus::Material;
 using cyclus::Composition;
@@ -74,16 +75,30 @@ void Separations::Tick() {
     return;
   }
 
+   // determine efficiency value for the timestep
+   std::vector<double> updated_eff = AdjustEfficiencies();
+  
   Material::Ptr mat = feed.Pop(std::min(throughput, feed.quantity()));
   double orig_qty = mat->quantity();
 
+  // Finally overwrite the Stream efficiencies in the original stream structure
   StreamSet::iterator it;
   double maxfrac = 1;
   std::map<std::string, Material::Ptr> stagedsep;
   for (it = streams_.begin(); it != streams_.end(); ++it) {
+    double curr_eff = -1;
     Stream info = it->second;
     std::string name = it->first;
-    stagedsep[name] = SepMaterial(info.second, mat);
+    if (name == "Fuel") {
+      curr_eff = updated_eff[0];
+    }
+    else if (name == "Diverted") {
+      curr_eff = updated_eff[1];
+    }
+    else if (name == "Losses") {
+      curr_eff = updated_eff[2];
+    }
+    stagedsep[name] = SepMaterial(info.second, mat, curr_eff);
     double frac = streambufs[name].space() / stagedsep[name]->quantity();
     if (frac < maxfrac) {
       maxfrac = frac;
@@ -115,9 +130,87 @@ void Separations::Tick() {
   }
 }
 
+
+//----------------------------------------------------------------------
+// Add behavior to separation efficiencies to affect how much reprocessed
+// material is diverted, and when.
+std::vector<double> AdjustEfficiencies() {
+    
+  int cur_time = cyclus::context()->time();
+  double ideal_fuel = 0;
+  double ideal_diverted = 0;
+  double ideal_loss = 0;
+
+  std::map<std::string, std::vector<double> >::iterator eff_it;
+  for (eff_it = eff_variation.begin(); eff_it != eff_variation.end(); ++eff_it){
+    std::vector eff_params = eff_it->second;
+    std::string stream_name = eff_it->first;
+    double avg_qty = eff_params[0];
+    double sigma = eff_params[1];
+    double freq = eff_params[2];
+    double desired_eff;
+    // determine the amount to request (if sigma=0 then RNG is not queried)
+    // if freq = 1 then trade on every timestep 
+    desired_eff = RNG_NormalDist(avg_qty, sigma, rng_seed);
+    // make sure result is within bounds of 0-1
+    if (desired_eff > 1) {
+      desired_eff = 1;
+    }
+    else if (desired_eff < 0) {
+      desired_eff = 0;
+    }
+    // Now set efficiency to zero if it's not the right timestep
+    if (freq > 1) {
+      desired_eff *= EveryXTimestep(cur_time, freq);
+    }
+    // if frequency is negative, use Random
+    else if (freq < 0) {
+	desired_eff *= EveryRandomXTimestep(freq, rng_seed);
+    }
+    // if frequency is 0, no trading occurs
+    else {
+      desired_eff = 0;
+    }
+    // now save the desired eff outside the loop
+    if (stream_name == "Fuel") {
+      ideal_fuel = desired_eff;
+    }
+    else if (stream_name == "Diverted") {
+      if   (cur_time < t_trade) {
+	ideal_diverted = 0;
+      }
+      else {
+	ideal_diverted = desired_eff;
+      }
+    }
+    else if (stream_name == "Losses") {
+      ideal_loss = desired_eff;
+    }
+    else {
+      LOG(cyclus::LEV_INFO1, "SepFac") << stream_name << " stream is non-standard and will be considered as waste";
+    }
+  }
+
+  // Now recalculate all efficiencies to make sure net is > 0
+  double net_eff = ideal_loss + ideal_diverted + ideal_fuel ;
+  if (net_eff > 1) {
+    ideal_fuel -= (net_eff - 1);
+    if (ideal_fuel < 0) {
+      throw cyclus::ValueError("Total efficiency of Sep streams " \
+			       "is greater than 1" );
+    }
+  }
+  std::vector<double> updated_eff = [ideal_fuel, ideal_diverted, ideal_loss];
+  return updated_eff;
+  }
+    
+//----------------------------------------------------------------------
+
+
 // Note that this returns an untracked material that should just be used for
 // its composition and qty - not in any real inventories, etc.
-Material::Ptr SepMaterial(std::map<int, double> effs, Material::Ptr mat) {
+  Material::Ptr SepMaterial(std::map<int, double> effs, Material::Ptr mat,
+			    double ideal_eff) {
   CompMap cm = mat->comp()->mass();
   cyclus::compmath::Normalize(&cm, mat->quantity());
   double tot_qty = 0;
@@ -129,9 +222,21 @@ Material::Ptr SepMaterial(std::map<int, double> effs, Material::Ptr mat) {
     int elem = (nuc / 10000000) * 10000000;
     double eff = 0;
     if (effs.count(nuc) > 0) {
-      eff = effs[nuc];
+      if (effs[nuc] != 0) {
+	if (ideal_eff == -1) {
+	  eff = effs[nuc];
+	} else {
+	  eff = ideal_eff;
+	}
+      }
     } else if (effs.count(elem) > 0) {
-      eff = effs[elem];
+      if (effs[elem] != 0){
+	if (ideal_eff == -1) {
+	  eff = effs[elem];
+	} else {
+	  eff = ideal_eff;
+	}
+      }
     } else {
       continue;
     }
