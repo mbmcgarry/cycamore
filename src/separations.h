@@ -1,9 +1,14 @@
 #ifndef CYCAMORE_SRC_SEPARATIONS_H_
 #define CYCAMORE_SRC_SEPARATIONS_H_
 
+#include <string>
+#include <vector>
+
 #include "cyclus.h"
 
 namespace cycamore {
+
+class Context;
 
 /// SepMaterial returns a material object that represents the composition and
 /// quantity resulting from the separation of material from mat using the given
@@ -15,8 +20,6 @@ namespace cycamore {
 cyclus::Material::Ptr SepMaterial(std::map<int, double> effs,
                                   cyclus::Material::Ptr mat,
 				  double ideal_eff);
-
-std::vector<double> AdjustEfficiencies();
 
 /// Separations processes feed material into one or more streams containing
 /// specific elements and/or nuclides.  It uses mass-based efficiencies.
@@ -37,32 +40,34 @@ std::vector<double> AdjustEfficiencies();
 /// streams, further processing/separations of feed material will halt until
 /// room is again available in the output streams.
 class Separations : public cyclus::Facility {
-#pragma cyclus note { \
-  "niche": "separations", \
-  "doc": \
-    "Separations processes feed material into one or more streams containing" \
-    " specific elements and/or nuclides.  It uses mass-based efficiencies." \
-    "\n\n" \
-    "User defined separations streams are specified as groups of" \
-    " component-efficiency pairs where 'component' means either a particular" \
-    " element or a particular nuclide.  Each component's paired efficiency" \
-    " represents the mass fraction of that component in the feed that is" \
-    " separated into that stream.  The efficiencies of a particular component" \
-    " across all streams must sum up to less than or equal to one.  If less than" \
-    " one, the remainining material is sent to a waste inventory and" \
-    " (potentially) traded away from there." \
-    "\n\n" \
-    "The facility receives material into a feed inventory that it processes with" \
-    " a specified throughput each time step.  Each output stream has a" \
-    " corresponding output inventory size/limit.  If the facility is unable to" \
-    " reduce its stocks by trading and hits this limit for any of its output" \
-    " streams, further processing/separations of feed material will halt until" \
-    " room is again available in the output streams." \
-    "", \
-}
  public:
+
   Separations(cyclus::Context* ctx);
   virtual ~Separations(){};
+
+#pragma cyclus note {	    \
+    "niche": "separations", \
+    "doc": \
+      "Separations processes feed material into one or more streams containing"\
+      " specific elements and/or nuclides.  It uses mass-based efficiencies." \
+      "\n\n" \
+      "User defined separations streams are specified as groups of" \
+      " component-efficiency pairs where 'component' means either a particular"\
+      " element or a particular nuclide.  Each component's paired efficiency" \
+      " represents the mass fraction of that component in the feed that is" \
+      " separated into that stream.  The efficiencies of a particular " \
+      " component across all streams must sum up to less than or equal to one."\
+      " If less than one, the remainining material is sent to a waste" \
+      " inventory and (potentially) traded away from there." \
+      "\n\n" \
+      "The facility receives material into a feed inventory that it processes"\
+      " with a specified throughput each time step.  Each output stream has a" \
+      " corresponding output inventory size/limit.  If the facility is unable"\
+      " to reduce its stocks by trading and hits this limit for any of its" \
+      " output streams, further processing/separations of feed material will" \
+      " halt until room is again available in the output streams." \
+      "", \
+  }
 
   virtual void Tick();
   virtual void Tock();
@@ -82,6 +87,8 @@ class Separations : public cyclus::Facility {
       std::vector<std::pair<cyclus::Trade<cyclus::Material>,
                             cyclus::Material::Ptr> >& responses);
 
+  virtual std::vector<double> AdjustEfficiencies();
+  
   #pragma cyclus clone
   #pragma cyclus initfromcopy
   #pragma cyclus infiletodb
@@ -98,7 +105,6 @@ class Separations : public cyclus::Facility {
   virtual cyclus::Inventories SnapshotInv();
   virtual void InitInv(cyclus::Inventories& inv);
 
-  
  private:
   #pragma cyclus var { \
     "doc": "Ordered list of commodities on which to request feed material to " \
@@ -192,8 +198,24 @@ class Separations : public cyclus::Facility {
            " (e.g. sum of U efficiencies for all streams must be <= 1).", \
   }
   std::map<std::string, std::pair<double, std::map<int, double> > > streams_;
-  #pragma cyclus var { \
-    "alias": ["streams", ["info", ["avg_efficiency", "sigma", "frequency"]]], \
+
+  /*
+  #pragma cyclus var {"default": 0, "tooltip": "defines RNG seed",\
+                        "doc": "seed on current system time if set to -1," \
+                               " otherwise seed on number defined"}
+  int rng_seed;
+
+  #pragma cyclus var {"default": 0,					\
+                      "tooltip": "time to being allowing trades",\
+                          "doc": "At all timesteps before this value, the "   \
+                                 "facility does make material requests. At " \
+                                 "times at or beyond this value, requests are "\
+                                 "made subject to the other behavioral " \
+                                 "features available in this archetype"  }
+  double t_trade;    
+
+  #pragma cyclus var {\
+    //    "alias": ["streams", ["info", ["avg_efficiency", "sigma", "frequency"]]], \
     "uitype": ["oneormore", "outcommodity", ["map", "string", ["double"]]], \
     "uilabel": "Variation in efficiency for each stream", \
     "doc": "Variation in efficiency for each stream" \
@@ -217,20 +239,7 @@ class Separations : public cyclus::Facility {
   }
   std::map<std::string, std::vector<double> > eff_variation;
 
-  #pragma cyclus var {"default": 0, "tooltip": "defines RNG seed",\
-                        "doc": "seed on current system time if set to -1," \
-                               " otherwise seed on number defined"}
-  int rng_seed;
-
-  #pragma cyclus var {"default": 0,					\
-                      "tooltip": "time to being allowing trades",\
-                          "doc": "At all timesteps before this value, the "   \
-                                 "facility does make material requests. At " \
-                                 "times at or beyond this value, requests are "\
-                                 "made subject to the other behavioral " \
-                                 "features available in this archetype"  }
-  double t_trade;   //*** 
-  
+  */ 
   // custom SnapshotInv and InitInv and EnterNotify are used to persist this
   // state var.
   std::map<std::string, cyclus::toolkit::ResBuf<cyclus::Material> > streambufs;

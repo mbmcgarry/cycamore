@@ -1,6 +1,8 @@
 #include "separations.h"
 #include "behavior_functions.h"
 
+#include <vector>
+
 using cyclus::Material;
 using cyclus::Composition;
 using cyclus::toolkit::ResBuf;
@@ -135,24 +137,53 @@ void Separations::Tick() {
 // Add behavior to separation efficiencies to affect how much reprocessed
 // material is diverted, and when.
 std::vector<double> AdjustEfficiencies() {
-    
-  int cur_time = cyclus::context()->time();
+  using cyclus::Context;
+  using cyclus::Agent;
+
   double ideal_fuel = 0;
   double ideal_diverted = 0;
   double ideal_loss = 0;
-
   std::map<std::string, std::vector<double> >::iterator eff_it;
-  for (eff_it = eff_variation.begin(); eff_it != eff_variation.end(); ++eff_it){
-    std::vector eff_params = eff_it->second;
+
+   int curr_time = ctx()->time();
+
+   /*
+  // Temporary for testing
+   //  int curr_time = Agent::context()->time();
+   int curr_time = 10;
+  int rng_seed = 0;
+  int t_trade = 0;
+  
+ // [avg_eff, sigma, frequency]
+  std::map<std::string, std::vector<double> > eff_var;
+  std::vector<double> init_eff;
+  init_eff.push_back(0.2);
+  init_eff.push_back(0);
+  init_eff.push_back(2);
+
+  eff_var["Fuel"] = init_eff ;
+  eff_var["Diverted"] = init_eff ;
+  eff_var["Losses"] = init_eff ;
+
+  for (eff_it = eff_var.begin(); eff_it != eff_var.end(); ++eff_it){
+   */  
+   for (eff_it = eff_variation.begin(); eff_it != eff_variation.end(); ++eff_it){
+    std::vector<double> eff_params = eff_it->second;
     std::string stream_name = eff_it->first;
     double avg_qty = eff_params[0];
     double sigma = eff_params[1];
     double freq = eff_params[2];
+    std::cout << "Starting Stream is " << stream_name << std::endl;
+    std::cout << "Eff, sigma, freq: " << avg_qty <<
+      "  " << sigma << "  " << freq << std::endl;
+    
     double desired_eff;
     // determine the amount to request (if sigma=0 then RNG is not queried)
     // if freq = 1 then trade on every timestep 
     desired_eff = RNG_NormalDist(avg_qty, sigma, rng_seed);
     // make sure result is within bounds of 0-1
+    std::cout << "RNG desired eff: " << desired_eff << std::endl;
+ 
     if (desired_eff > 1) {
       desired_eff = 1;
     }
@@ -160,8 +191,8 @@ std::vector<double> AdjustEfficiencies() {
       desired_eff = 0;
     }
     // Now set efficiency to zero if it's not the right timestep
-    if (freq > 1) {
-      desired_eff *= EveryXTimestep(cur_time, freq);
+    if (freq >= 1) {
+      desired_eff *= EveryXTimestep(curr_time, freq);
     }
     // if frequency is negative, use Random
     else if (freq < 0) {
@@ -176,7 +207,7 @@ std::vector<double> AdjustEfficiencies() {
       ideal_fuel = desired_eff;
     }
     else if (stream_name == "Diverted") {
-      if   (cur_time < t_trade) {
+      if   (curr_time < t_trade) {
 	ideal_diverted = 0;
       }
       else {
@@ -189,10 +220,13 @@ std::vector<double> AdjustEfficiencies() {
     else {
       LOG(cyclus::LEV_INFO1, "SepFac") << stream_name << " stream is non-standard and will be considered as waste";
     }
-  }
+    std::cout << "after checks, desired eff: " << desired_eff << std::endl;
 
+  }
+ 
   // Now recalculate all efficiencies to make sure net is > 0
   double net_eff = ideal_loss + ideal_diverted + ideal_fuel ;
+  std::cout << "Net eff is " << net_eff << std::endl;
   if (net_eff > 1) {
     ideal_fuel -= (net_eff - 1);
     if (ideal_fuel < 0) {
@@ -200,7 +234,13 @@ std::vector<double> AdjustEfficiencies() {
 			       "is greater than 1" );
     }
   }
-  std::vector<double> updated_eff = [ideal_fuel, ideal_diverted, ideal_loss];
+  std::cout << "checking net eff: " << net_eff << std::endl;
+   
+  std::vector<double> updated_eff ;
+  updated_eff.push_back(ideal_fuel);
+  updated_eff.push_back(ideal_diverted);
+  updated_eff.push_back(ideal_loss);
+
   return updated_eff;
   }
     
