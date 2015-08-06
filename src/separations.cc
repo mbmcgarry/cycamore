@@ -136,18 +136,17 @@ void Separations::Tick() {
 //----------------------------------------------------------------------
 // Add behavior to separation efficiencies to affect how much reprocessed
 // material is diverted, and when.
-std::vector<double> AdjustEfficiencies() {
-  using cyclus::Context;
-  using cyclus::Agent;
+std::vector<double> Separations::AdjustEfficiencies() {
+  //  using cyclus::Context;
 
   double ideal_fuel = 0;
   double ideal_diverted = 0;
   double ideal_loss = 0;
   std::map<std::string, std::vector<double> >::iterator eff_it;
 
-   int curr_time = ctx()->time();
-
-   /*
+  int curr_time = ctx()->time();
+  /*
+   
   // Temporary for testing
    //  int curr_time = Agent::context()->time();
    int curr_time = 10;
@@ -166,8 +165,8 @@ std::vector<double> AdjustEfficiencies() {
   eff_var["Losses"] = init_eff ;
 
   for (eff_it = eff_var.begin(); eff_it != eff_var.end(); ++eff_it){
-   */  
-   for (eff_it = eff_variation.begin(); eff_it != eff_variation.end(); ++eff_it){
+*/
+    for (eff_it = eff_variation.begin(); eff_it != eff_variation.end(); ++eff_it){
     std::vector<double> eff_params = eff_it->second;
     std::string stream_name = eff_it->first;
     double avg_qty = eff_params[0];
@@ -181,6 +180,7 @@ std::vector<double> AdjustEfficiencies() {
     // determine the amount to request (if sigma=0 then RNG is not queried)
     // if freq = 1 then trade on every timestep 
     desired_eff = RNG_NormalDist(avg_qty, sigma, rng_seed);
+
     // make sure result is within bounds of 0-1
     std::cout << "RNG desired eff: " << desired_eff << std::endl;
  
@@ -196,7 +196,7 @@ std::vector<double> AdjustEfficiencies() {
     }
     // if frequency is negative, use Random
     else if (freq < 0) {
-	desired_eff *= EveryRandomXTimestep(freq, rng_seed);
+      desired_eff *= EveryRandomXTimestep(freq, rng_seed);
     }
     // if frequency is 0, no trading occurs
     else {

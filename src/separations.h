@@ -21,6 +21,8 @@ cyclus::Material::Ptr SepMaterial(std::map<int, double> effs,
                                   cyclus::Material::Ptr mat,
 				  double ideal_eff);
 
+// std::vector<double> AdjustEfficiencies();
+ 
 /// Separations processes feed material into one or more streams containing
 /// specific elements and/or nuclides.  It uses mass-based efficiencies.
 ///
