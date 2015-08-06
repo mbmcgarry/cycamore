@@ -144,7 +144,7 @@ std::vector<double> Separations::AdjustEfficiencies() {
   double ideal_loss = 0;
   std::map<std::string, std::vector<double> >::iterator eff_it;
 
-  int curr_time = ctx()->time();
+  int curr_time = context()->time();
   /*
    
   // Temporary for testing
