@@ -245,7 +245,7 @@ class Separations : public cyclus::Facility {
            " Frequency is the time-base for irregular changes in amplitude " \
 	   " To apply Normal Distribution: [mean, sigma, 1] " \
 	   "             Every X Timestep: [mean, 0, freq] " \
-           "        Every Random Timestep: [mean, -1, freq]"	     \
+           "        Every Random Timestep: [mean, sigma, -1*freq]"	     \
            " Total efficiency of all strings <= 1.  Covert efficiency is " \
 	   " defined here. Loss is fixed [mean, 0, 1].  " \
            " Natural variation in Fuel is defined, then adjusted to be"   \

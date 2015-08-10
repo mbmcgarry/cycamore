@@ -2,6 +2,7 @@
 #include "behavior_functions.h"
 
 #include <vector>
+#include <cmath>
 
 using cyclus::Material;
 using cyclus::Composition;
@@ -183,7 +184,6 @@ std::vector<double> Separations::AdjustEfficiencies() {
 
     // make sure result is within bounds of 0-1
     std::cout << "RNG desired eff: " << desired_eff << std::endl;
- 
     if (desired_eff > 1) {
       desired_eff = 1;
     }
@@ -191,12 +191,15 @@ std::vector<double> Separations::AdjustEfficiencies() {
       desired_eff = 0;
     }
     // Now set efficiency to zero if it's not the right timestep
-    if (freq >= 1) {
-      desired_eff *= EveryXTimestep(curr_time, freq);
+    //    if (freq < 0) {
+    //      int abs_freq = abs(freq);
+    if (freq == 100) {
+      int abs_freq = 2;
+      desired_eff *= EveryRandomXTimestep(abs_freq, rng_seed);
     }
-    // if frequency is negative, use Random
-    else if (freq < 0) {
-      desired_eff *= EveryRandomXTimestep(freq, rng_seed);
+    else if (freq >= 1) {
+      std::cout << "Calling Every X!!" << std::endl;
+      desired_eff *= EveryXTimestep(curr_time, freq);
     }
     // if frequency is 0, no trading occurs
     else {
@@ -234,8 +237,11 @@ std::vector<double> Separations::AdjustEfficiencies() {
 			       "is greater than 1" );
     }
   }
-  std::cout << "checking net eff: " << net_eff << std::endl;
-   
+
+  double final_eff = ideal_loss + ideal_diverted + ideal_fuel;
+  std::cout << "After check: Ideal_fuel: " << ideal_fuel << std::endl;
+  std::cout << "After check: Final eff: " << final_eff << std::endl;
+
   std::vector<double> updated_eff ;
   updated_eff.push_back(ideal_fuel);
   updated_eff.push_back(ideal_diverted);

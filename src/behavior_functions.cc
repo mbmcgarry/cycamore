@@ -9,6 +9,9 @@ bool seeded;
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 bool EveryXTimestep(int curr_time, int interval) {
   // true when there is no remainder, so it is the Xth timestep
+  if (interval <= 0) {
+    return 0;
+  }
   return curr_time % interval == 0;
 }
 
@@ -58,7 +61,7 @@ bool EveryRandomXTimestep(int frequency) {
 
 double RNG_NormalDist(double mean, double sigma, int rng_seed) {
 
-  if (sigma == 0 ) {
+  if (sigma <= 0 ) {
     return mean ;
   }
 
