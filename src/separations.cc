@@ -191,10 +191,10 @@ std::vector<double> Separations::AdjustEfficiencies() {
       desired_eff = 0;
     }
     // Now set efficiency to zero if it's not the right timestep
-    //    if (freq < 0) {
-    //      int abs_freq = abs(freq);
-    if (freq == 100) {
-      int abs_freq = 2;
+    if (freq < 0) {
+      int abs_freq = abs(freq);
+    //    if (freq == 100) {
+    //      int abs_freq = 2;
       desired_eff *= EveryRandomXTimestep(abs_freq, rng_seed);
     }
     else if (freq >= 1) {
