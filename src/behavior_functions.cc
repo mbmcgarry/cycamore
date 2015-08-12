@@ -34,11 +34,9 @@ bool EveryRandomXTimestep(int frequency, int rng_seed) {
   int midpoint = frequency / 2;  
  
   // The interwebs say that rand is not truly random.
-  //  tRan = rand() % frequency;
   double cur_rand = rand();
   int tRan = 1 + (cur_rand*(1.0/(RAND_MAX+1.0))) * frequency;
   //  int tRan = 1 + uniform_deviate_(rand()) * frequency;
-    std::cout << "EveryRandom: " << cur_rand/RAND_MAX << std::endl;
 
   if (tRan == midpoint) {
     return true;
@@ -46,14 +44,6 @@ bool EveryRandomXTimestep(int frequency, int rng_seed) {
    return false;
   }
 }
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-/*
-bool EveryRandomXTimestep(int frequency) {
-  bool time_seed = 0 ;
-  return EveryRandomXTimestep(frequency, time_seed);
-}
-*/
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Use Box-Muller algorithm to make a random number sampled from
@@ -88,35 +78,16 @@ double RNG_NormalDist(double mean, double sigma, int rng_seed) {
     x = 2.0*rand1/RAND_MAX - 1;
     y = 2.0*rand2/RAND_MAX - 1;
     r = x*x + y*y;
-    std::cout << rand1/RAND_MAX << "  " << rand2/RAND_MAX  << std::endl;
   } while (r == 0.0 || r > 1.0);
   
   double d = std::sqrt(-2.0*log(r)/r);
   double n1 = x*d;
   n2 = y*d;
   
-  /*
-  if (!n2_cached) {
-    n2_cached = 1;
-    return n1*sigma + mean;
-  }
-  else {
-    n2_cached = 0 ;
-    return n2*sigma + mean;
-  }
-  */
-  std::cout << "NormalDist: " << n1*sigma + mean  << std::endl;
   return n1*sigma + mean;
 
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-/*
-double RNG_NormalDist(double mean, double sigma) {
-  bool time_seed = 0;
-  return RNG_NormalDist(mean, sigma, time_seed);
-}
-*/
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 /*
 // Internal function to make a better random number

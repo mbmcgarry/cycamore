@@ -215,20 +215,6 @@ class Separations : public cyclus::Facility {
                                  "features available in this archetype"  }
   double t_trade;
 
-  // This works for sure:
-  //    "alias": ["stream_commod", "info"],			      \
-    // "uitype": ["oneormore", "outcommodity", ["oneormore", "double"]], \
-
-    //     Map[Container    MapKey     MapVal[PairName  Val1,   Val2-Map[ContainerName,  Map-Key,   Map-Value  ]
-//  "alias":  ["streams",   "commod",       ["info", "buf_size", ["efficiencies", "comp",    "eff"]]], \
-// "uitype":  ["oneormore", "outcommodity", ["pair", "double",   ["oneormore",    "nuclide", "double"]]], \
-
-
-   //      Map[Container,   MapKey    MapVal[VectorContainer Values]  
-  //    "alias":  ["eff_variation", "stream_commod", ["eff_sigma_freq"]], \
-   //  "uitype": ["oneormore", "outcommodity", ["oneormore", "double"]], \
-
-
 #pragma cyclus var {							\
       "alias":  ["eff_var", "stream_commod", "eff_sigma_freq"],	\
     "tooltip": "Variation in efficiency for each stream",		\
