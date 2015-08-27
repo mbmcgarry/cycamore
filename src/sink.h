@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "cyclus.h"
+#include "cycamore_version.h"
 #include "behavior_functions.h"
 
 namespace cycamore {
@@ -20,10 +21,11 @@ class Context;
 /// that recipe. Requests are made for any number of specified commodities.
 class Sink : public cyclus::Facility  {
  public:
-
   Sink(cyclus::Context* ctx);
 
   virtual ~Sink();
+
+  virtual std::string version() { return CYCAMORE_VERSION; }
 
   #pragma cyclus note { \
     "doc": \
