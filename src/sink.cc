@@ -15,7 +15,7 @@ Sink::Sink(cyclus::Context* ctx)
       social_behav(""), //***
       behav_interval(0), //***
       rng_seed(0), //****
-      user_pref(0), //***
+      user_pref(1), //***
       sigma(0), //***
       t_trade(0), //***
       max_inv_size(1e299) {}  // actually only used in header file

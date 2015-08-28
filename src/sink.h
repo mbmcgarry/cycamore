@@ -117,7 +117,7 @@ class Sink : public cyclus::Facility  {
                              "implemented"}
   double behav_interval;
 
-  #pragma cyclus var {"default": 0, "tooltip": "user-defined preference" , \
+  #pragma cyclus var {"default": 1, "tooltip": "user-defined preference" , \
                       "doc": "change the default preference for requests "\
                              "from this agent"}
   int user_pref;
