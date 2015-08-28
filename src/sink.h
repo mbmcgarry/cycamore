@@ -77,9 +77,12 @@ class Sink : public cyclus::Facility  {
   /// @return the current inventory storage size
   inline double InventorySize() const { return inventory.quantity(); }
 
-  // Amount of material to be requested. Re-assessed at each timestep
-  // in the Tick
-  double amt ;
+  /// determines the amount to request
+  double RequestAmt() const {
+    double desired_amt = RNG_NormalDist(avg_qty, sigma, rng_seed);
+    return std::min(desired_amt, std::max(0.0, inventory.space()));
+  }
+  
 
   /// @return the input commodities
   inline const std::vector<std::string>&

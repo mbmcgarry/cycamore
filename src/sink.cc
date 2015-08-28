@@ -70,8 +70,26 @@ Sink::GetMatlRequests() {
   using cyclus::Request;
   using cyclus::Composition;
 
+  double amt = RequestAmt();
+
   std::set<RequestPortfolio<Material>::Ptr> ports;
 
+  // Want opposite behavior of EF.  Return EMPTY port if
+  // conditions are not met.
+  if (social_behav == "Every" && behav_interval > 0) {
+    int cur_time = context()->time();
+    if (!EveryXTimestep(cur_time, behav_interval)) // HEU every X time
+      {
+	return ports; 
+      }
+  }
+  else if (social_behav == "Random" && behav_interval > 0) {
+    if (!EveryRandomXTimestep(behav_interval, rng_seed)) // HEU randomly one in X times
+      {
+	return ports; 
+      }
+  }
+  
   // If social behavior, amt will be set to zero on non-trading timesteps
   if (amt == 0) {
     return ports;
@@ -112,8 +130,10 @@ Sink::GetGenRsrcRequests() {
 
   std::set<RequestPortfolio<Product>::Ptr> ports;
   RequestPortfolio<Product>::Ptr
-      port(new RequestPortfolio<Product>());
+    port(new RequestPortfolio<Product>());
 
+  double amt = RequestAmt();
+  
   if (amt > cyclus::eps()) {
     CapacityConstraint<Product> cc(amt);
     port->AddConstraint(cc);
@@ -176,11 +196,15 @@ void Sink::Tick() {
   using std::vector;
   LOG(cyclus::LEV_INFO3, "SnkFac") << prototype() << " is ticking {";
 
+  double requestAmt = RequestAmt();
+ 
+  /*
   // set the amount to be requested on this timestep
   // then determine whether trading will happen on this timestep. If not
   // then change the requested material to zero.
   int cur_time = context()->time();
-  
+
+ 
   /// determine the amount to request
   // If sigma=0 then RNG is not queried
   double desired_amt = RNG_NormalDist(avg_qty, sigma, rng_seed);
@@ -211,13 +235,15 @@ void Sink::Tick() {
     std::cout << "Amt is zero because Reference superficially queries RNG " << std::endl;
     amt = 0;
   }
+ 
+  */
   
   // inform the simulation about what the sink facility will be requesting
-  if (amt > cyclus::eps()) {
+  if (requestAmt > cyclus::eps()) {
     for (vector<string>::iterator commod = in_commods.begin();
          commod != in_commods.end();
          commod++) {
-      LOG(cyclus::LEV_INFO4, "SnkFac") << " will request " << amt
+      LOG(cyclus::LEV_INFO4, "SnkFac") << " will request " << requestAmt
                                        << " kg of " << *commod << ".";
     }
   }
