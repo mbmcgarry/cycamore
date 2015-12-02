@@ -206,7 +206,7 @@ void Sink::Tick() {
       }
   }
   // If reference, query RNG but force trade as zero quantity.
-  else if (social_behav == "Reference"){
+  else if ((social_behav == "Reference") && (amt > 0)){
     bool res = EveryRandomXTimestep(behav_interval, rng_seed);
     std::cout << "Amt is zero because Reference superficially queries RNG " << std::endl;
     amt = 0;
