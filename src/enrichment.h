@@ -247,7 +247,11 @@ class Enrichment : public cyclus::Facility {
   inline const cyclus::toolkit::ResBuf<cyclus::Material>& Tails() const {
     return tails;
   } 
-  
+  // Tails assay at each timestep. Re-assessed at each Tick if sigma_tails > 0
+  double curr_tails_assay ;
+ 
+
+
  private:
   ///   @brief adds a material into the natural uranium inventory
   ///   @throws if the material is not the same composition as the feed_recipe
@@ -310,8 +314,16 @@ class Enrichment : public cyclus::Facility {
     "uilabel": "Tails Assay",                               \
     "doc": "tails assay from the enrichment process",       \
   }
-  double tails_assay;
-  
+  double avg_tails_assay;
+
+  #pragma cyclus var {"default": 0, "tooltip": "standard deviation of tails",\
+                          "doc": "standard deviation (FWHM) of the normal " \
+                                 "distribution used to generate tails " \
+                                 "assay (if 0 then no distribution is " \
+                                 "calculated and assay is constant in time." \
+  }
+  double sigma_tails;  
+
   #pragma cyclus var {							\
     "default": 0, "tooltip": "initial uranium reserves (kg)",		\
     "uilabel": "Initial Feed Inventory",				\

@@ -14,7 +14,8 @@ namespace cycamore {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Enrichment::Enrichment(cyclus::Context* ctx)
     : cyclus::Facility(ctx),
-      tails_assay(0),
+      avg_tails_assay(0),
+      sigma_tails(0),
       swu_capacity(0),
       max_enrich(1), 
       social_behav("None"), //***
@@ -36,7 +37,7 @@ std::string Enrichment::str() {
   ss << cyclus::Facility::str()
      << " with enrichment facility parameters:"
      << " * SWU capacity: " << SwuCapacity()
-     << " * Tails assay: " << tails_assay
+     << " * Tails assay: " << curr_tails_assay
      << " * Feed assay: " << FeedAssay()
      << " * Input cyclus::Commodity: " << feed_commod
      << " * Output cyclus::Commodity: " << product_commod
@@ -65,6 +66,7 @@ void Enrichment::Tick() {
 
   int cur_time = context()->time();
   
+  // decide whether trading if trading only sometimes.
   trade_timestep = 0 ;
   if (social_behav == "Every" && behav_interval > 0) {
     trade_timestep = (EveryXTimestep(cur_time, behav_interval));
@@ -75,7 +77,12 @@ void Enrichment::Tick() {
   else if (social_behav == "None") {
     trade_timestep = 1;
   }
-
+  
+  // determine tails assay for the timestep if it is variable
+  curr_tails_assay = RNG_NormalDist(avg_tails_assay, sigma_tails,
+				    rng_seed);
+  std::cout << "Tails is " << curr_tails_assay << std::endl;
+      
   LOG(cyclus::LEV_INFO3, "EnrFac") << prototype() << " is ticking {";
   LOG(cyclus::LEV_INFO3, "EnrFac") << "}";
   current_swu_capacity = SwuCapacity();
@@ -243,8 +250,8 @@ std::set<cyclus::BidPortfolio<cyclus::Material>::Ptr> Enrichment::GetMatlBids(
       }
     }
     */
-    Converter<Material>::Ptr sc(new SWUConverter(FeedAssay(), tails_assay));
-    Converter<Material>::Ptr nc(new NatUConverter(FeedAssay(), tails_assay));
+    Converter<Material>::Ptr sc(new SWUConverter(FeedAssay(), curr_tails_assay));
+    Converter<Material>::Ptr nc(new NatUConverter(FeedAssay(), curr_tails_assay));
     CapacityConstraint<Material> swu(swu_capacity, sc);
     CapacityConstraint<Material> natu(inventory.quantity(), nc);
     commod_port->AddConstraint(swu);
@@ -266,7 +273,7 @@ bool Enrichment::ValidReq(const cyclus::Material::Ptr mat) {
   cyclus::toolkit::MatQuery q(mat);
   double u235 = q.atom_frac(922350000);
   double u238 = q.atom_frac(922380000);
-  return (u238 > 0 && u235 / (u235 + u238) > tails_assay);
+  return (u238 > 0 && u235 / (u235 + u238) > curr_tails_assay);
 }
   
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -390,7 +397,7 @@ cyclus::Material::Ptr Enrichment::Enrich_(
   using cyclus::toolkit::TailsQty;
 
   // get enrichment parameters
-  Assays assays(FeedAssay(), UraniumAssay(mat), tails_assay);
+  Assays assays(FeedAssay(), UraniumAssay(mat), curr_tails_assay);
   double swu_req = SwuRequired(qty, assays);
   double natu_req = FeedQty(qty, assays);
 
@@ -416,7 +423,7 @@ cyclus::Material::Ptr Enrichment::Enrich_(
       r = inventory.Pop(feed_req);
     }
   } catch (cyclus::Error& e) {
-    NatUConverter nc(FeedAssay(), tails_assay);
+    NatUConverter nc(FeedAssay(), curr_tails_assay);
     std::stringstream ss;
     ss << " tried to remove " << feed_req
        << " from its inventory of size " << inventory.quantity()
