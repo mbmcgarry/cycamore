@@ -14,7 +14,7 @@ namespace cycamore {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Enrichment::Enrichment(cyclus::Context* ctx)
     : cyclus::Facility(ctx),
-      avg_tails_assay(0),
+      tails_assay(0),
       sigma_tails(0),
       swu_capacity(0),
       max_enrich(1), 
@@ -79,8 +79,15 @@ void Enrichment::Tick() {
   }
   
   // determine tails assay for the timestep if it is variable
-  curr_tails_assay = RNG_NormalDist(avg_tails_assay, sigma_tails,
+  curr_tails_assay = RNG_NormalDist(tails_assay, sigma_tails,
 				    rng_seed);
+  if (curr_tails_assay < (tails_assay - sigma_tails)) {
+    curr_tails_assay = tails_assay - sigma_tails;
+  }
+  if (curr_tails_assay > (tails_assay + sigma_tails)) {
+    curr_tails_assay = tails_assay + sigma_tails;
+  }
+
   std::cout << "Tails is " << curr_tails_assay << std::endl;
       
   LOG(cyclus::LEV_INFO3, "EnrFac") << prototype() << " is ticking {";

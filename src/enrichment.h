@@ -314,7 +314,7 @@ class Enrichment : public cyclus::Facility {
     "uilabel": "Tails Assay",                               \
     "doc": "tails assay from the enrichment process",       \
   }
-  double avg_tails_assay;
+  double tails_assay;
 
   #pragma cyclus var {"default": 0, "tooltip": "standard deviation of tails",\
                           "doc": "standard deviation (FWHM) of the normal " \
