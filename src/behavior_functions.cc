@@ -108,6 +108,27 @@ double RNG_NormalDist(double mean, double sigma, int rng_seed) {
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Randomly choose a discrete number between min and max
+// (ie. integer betweeen 1 and 5)
+
+double RNG_Integer(double min, double max, int rng_seed) {
+
+  if (!seeded) {
+    if (rng_seed == -1) {
+      srand(time(0)); // if seeding on time
+    }
+    else {
+      srand(rng_seed);  //use fixed seed for reproducibility
+    }
+    seeded = true;
+  }
+
+  int tRan = min + (rand()*(1.0/(RAND_MAX+1.0))) * max;
+
+  return tRan;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 /*
 double RNG_NormalDist(double mean, double sigma) {
   bool time_seed = 0;

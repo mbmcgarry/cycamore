@@ -82,11 +82,12 @@ Sink::GetMatlRequests() {
 
   Material::Ptr mat;
 
-  if (recipe_name.empty()) {
+  // if no recipe has been specified in either format
+  if (recipe_name.empty() and (recipe_names.size() == 0)) {
     mat = cyclus::NewBlankMaterial(amt);
   } else {
-    Composition::Ptr rec = this->context()->GetRecipe(recipe_name);
-    mat = cyclus::Material::CreateUntracked(amt, rec); 
+    //***    Composition::Ptr rec = this->context()->GetRecipe(recipe_name);
+    mat = cyclus::Material::CreateUntracked(amt, curr_recipe); 
   } 
 
   if (amt > cyclus::eps()) {
@@ -176,6 +177,19 @@ void Sink::Tick() {
   using std::vector;
   LOG(cyclus::LEV_INFO3, "SnkFac") << prototype() << " is ticking {";
 
+
+  // Determine the correct recipe for the timestep. If only one recipe
+  // is given then use that recipe. If multiple recipes are given, choose
+  // one randomly
+  int n_recipes = recipe_names.size();
+  if (n_recipes > 0) {
+    int curr_recipe_index = RNG_Integer(0.0, n_recipes, rng_seed);
+    curr_recipe = context()->GetRecipe(recipe_names[curr_recipe_index]);
+  }
+  else {
+    curr_recipe = context()->GetRecipe(recipe_name);
+  }
+  
   // set the amount to be requested on this timestep
   // then determine whether trading will happen on this timestep. If not
   // then change the requested material to zero.

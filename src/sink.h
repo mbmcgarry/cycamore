@@ -81,6 +81,10 @@ class Sink : public cyclus::Facility  {
   // in the Tick
   double amt ;
 
+  // Recipe for the current timestep, if multiple recipes are available
+  // (re-assessed in the Tick)
+  cyclus::Composition::Ptr curr_recipe;
+  
   /// @return the input commodities
   inline const std::vector<std::string>&
       input_commodities() const { return in_commods; }
@@ -93,14 +97,23 @@ class Sink : public cyclus::Facility  {
                       "uitype": ["oneormore", "incommodity"]}
   std::vector<std::string> in_commods;
 
-  #pragma cyclus var {"default": "", "tooltip": "requested composition", \
+  // if using a single recipe
+  #pragma cyclus var {"default": "", "tooltip": "requested composition",      \
                       "doc": "name of recipe to use for material requests, " \
                              "where the default (empty string) is to accept " \
                              "everything", \
                        "uilabel": "Input Recipe", \
                       "uitype": "recipe"}
   std::string recipe_name;
- 
+
+  // if using multiple recipes
+  #pragma cyclus var {"default": [],"uitype": ["oneormore", "recipe"], \
+    "uilabel": "Input Recipe List", \
+    "doc": "Input recipes to request for different timesteps " \
+            "(randomly chosen)", \
+  }
+  std::vector<std::string> recipe_names;
+  
   //***
   #pragma cyclus var {"default": "None", "tooltip": "social behavior",	\
                           "doc": "type of social behavior used in trade " \
@@ -122,7 +135,7 @@ class Sink : public cyclus::Facility  {
                              "from this agent"}
   int user_pref;
 
-#pragma cyclus var {"default": 0, "tooltip": "defines RNG seed",\
+  #pragma cyclus var {"default": 0, "tooltip": "defines RNG seed",\
                         "doc": "seed on current system time if set to -1," \
                                " otherwise seed on number defined"}
   int rng_seed;

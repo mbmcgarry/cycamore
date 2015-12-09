@@ -18,4 +18,10 @@ bool EveryRandomXTimestep(int frequency, int rng_seed);
 
 double RNG_NormalDist(double mean, double sigma, int rng_seed);
 
+// returns a randomly chosen discrete number between min and max
+// (ie. integer betweeen 1 and 5)
+
+double RNG_Integer(double min, double max, int rng_seed);
+
+
 #endif  //  CYCAMORE_SRC_BEHAVIOR_FUNCTIONS_H_
